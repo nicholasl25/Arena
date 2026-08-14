@@ -866,13 +866,11 @@
                     ariaLabel: `Entrant ${idx + 1} skin`,
                     onChange: (id) => {
                         const weaponId = slotWeaponId(slots[idx]);
-                        const prevColor = slots[idx].config?.color;
                         const prevName = slots[idx].config?.name;
                         const prevPowerup = slots[idx].config?.powerupId;
                         slots[idx] = makeSlot(id, idx);
                         slots[idx].empty = false;
                         slots[idx].config.weaponId = weaponId;
-                        if (prevColor) slots[idx].config.color = prevColor;
                         if (prevName) slots[idx].config.name = prevName;
                         if (prevPowerup) slots[idx].config.powerupId = prevPowerup;
                         setFolderForSlot(idx, folder);

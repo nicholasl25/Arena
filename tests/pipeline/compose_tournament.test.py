@@ -9,8 +9,8 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-FUN_DIR = Path(__file__).resolve().parents[2]
-PIPELINE_DIR = FUN_DIR / "pipeline"
+ARENA_DIR = Path(__file__).resolve().parents[2]
+PIPELINE_DIR = ARENA_DIR / "pipeline"
 sys.path.insert(0, str(PIPELINE_DIR))
 
 import compose_tournament as ct  # noqa: E402
@@ -325,7 +325,7 @@ class TournamentComposeTests(unittest.TestCase):
         )
         self.assertEqual(
             ct.build_intro_script(["Sword", "Bow"], powerup_spin=True),
-            "Welcome to the Ball Arena tournament. Sword, and Bow. Powerups are on. Who takes the crown?",
+            "Welcome to the 2 Weapon Arena Tournament. Sword, and Bow. Powerups are on. Who takes the crown?",
         )
         self.assertEqual(
             ct.build_intro_script(
@@ -333,13 +333,23 @@ class TournamentComposeTests(unittest.TestCase):
                 weapon_spin=True,
                 powerup_spin=True,
             ),
-            "Welcome to the Ball Arena tournament. Spiderman, and Thor. "
+            "Welcome to the Ball Arena Tournament. Spiderman, and Thor. "
+            "Each match they spin for a weapon. Powerups are on. Who takes the crown?",
+        )
+        self.assertEqual(
+            ct.build_intro_script(
+                ["Lakers", "Celtics"],
+                weapon_spin=True,
+                powerup_spin=True,
+                skin_folder="NBA Teams",
+            ),
+            "Welcome to the NBA Teams Ball Arena Tournament. Lakers, and Celtics. "
             "Each match they spin for a weapon. Powerups are on. Who takes the crown?",
         )
         big = [f"F{i}" for i in range(16)]
         self.assertEqual(
             ct.build_intro_script(big, powerup_spin=True),
-            "Welcome to the Ball Arena tournament. 16 competitors enter the arena. "
+            "Welcome to the 16 Weapon Arena Tournament. 16 competitors enter the arena. "
             "Powerups are on. Who takes the crown?",
         )
         self.assertNotIn("F0", ct.build_intro_script(big))

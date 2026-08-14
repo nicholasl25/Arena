@@ -22,7 +22,7 @@
 ## 4. Configure this skill
 
 ```bash
-cd resources/web/fun/youtube
+cd youtube
 cp .env.example .env
 # Edit .env with YT_CLIENT_ID and YT_CLIENT_SECRET
 python3 -m venv .venv

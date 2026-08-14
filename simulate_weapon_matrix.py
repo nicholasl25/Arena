@@ -19,8 +19,8 @@ from collections import defaultdict
 from itertools import combinations
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(FUN_DIR / "pipeline"))
+ARENA_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(ARENA_DIR / "pipeline"))
 
 from simulate_fights import DEFAULT_BASE_URL, _require_playwright  # noqa: E402
 
@@ -46,7 +46,7 @@ WEAPONS = [
 
 TRIALS_PER_PAIR = 10
 MAX_SECONDS = 90
-DEFAULT_OUT = FUN_DIR / "weapon-matrix.csv"
+DEFAULT_OUT = ARENA_DIR / "weapon-matrix.csv"
 # ---------------------------------------------------------------------------
 
 RANK_FIELDS = [

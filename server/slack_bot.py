@@ -44,7 +44,7 @@ from pathlib import Path
 from urllib.request import Request, urlopen
 
 SERVER_DIR = Path(__file__).resolve().parent
-FUN_DIR = SERVER_DIR.parent
+ARENA_DIR = SERVER_DIR.parent
 ENV_PATH = SERVER_DIR / ".env"
 
 # Import pipeline helpers from the workflow server module.

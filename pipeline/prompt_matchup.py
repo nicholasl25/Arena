@@ -6,10 +6,10 @@ import re
 from difflib import SequenceMatcher
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
-BALLS_DIR = FUN_DIR / "premade-balls"
-WEAPONS_DIR = FUN_DIR / "premade-weapons"
-SKINS_DIR = FUN_DIR / "skins"
+ARENA_DIR = Path(__file__).resolve().parent.parent
+BALLS_DIR = ARENA_DIR / "premade-balls"
+WEAPONS_DIR = ARENA_DIR / "premade-weapons"
+SKINS_DIR = ARENA_DIR / "skins"
 
 # Common misspellings / nicknames → catalog id
 SKIN_ALIASES = {
@@ -223,7 +223,7 @@ def _wants_weapon_mode(prompt: str, weapon_hits: list[str]) -> bool:
 
 def default_intro_mode() -> tuple[str, list[str]]:
     """Prefer default VS intro when Sukuna/Gojo (or first two) intros exist."""
-    intros_dir = FUN_DIR / "intros"
+    intros_dir = ARENA_DIR / "intros"
     if not intros_dir.is_dir():
         return "skip", []
     exts = {".png", ".jpg", ".jpeg", ".webp", ".gif"}

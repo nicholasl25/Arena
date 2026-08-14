@@ -13,7 +13,7 @@ def ensure_edge_tts_importable() -> None:
         return
     except ImportError:
         pass
-    venv = config.FUN_DIR / "youtube" / ".venv"
+    venv = config.ARENA_DIR / "youtube" / ".venv"
     if not venv.is_dir():
         raise RuntimeError("edge-tts unavailable; create youtube/.venv")
     import sys

@@ -24,7 +24,7 @@ from .captions import (
 )
 from .config import (
     CATEGORY_DEFAULT,
-    FUN_DIR,
+    ARENA_DIR,
     PAGE_REDIRECTS,
     PRIVACY_DEFAULT,
     TAGS_DEFAULT,
@@ -57,7 +57,7 @@ from .tournament_api import (
 
 class WorkflowHandler(SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory=str(FUN_DIR), **kwargs)
+        super().__init__(*args, directory=str(ARENA_DIR), **kwargs)
 
     def log_message(self, format: str, *args) -> None:  # noqa: A003
         line = str(args[0]) if args else ""

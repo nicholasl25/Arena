@@ -15,7 +15,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FUN = path.join(__dirname, '..');
+const ARENA = path.join(__dirname, '..');
 const STARTED = Date.now();
 
 function log(kind, msg) {
@@ -24,26 +24,26 @@ function log(kind, msg) {
 }
 
 global.window = global;
-require(path.join(FUN, 'premade-weapons/registry.js'));
+require(path.join(ARENA, 'premade-weapons/registry.js'));
 for (const file of [
     'sword.js', 'dagger.js', 'spikes.js', 'slingshot.js', 'bow.js', 'basketball.js',
     'hammer.js', 'fists.js', 'laser.js', 'staff.js', 'shield.js', 'webs.js',
     'boomerang.js', 'grenade.js', 'thunderrod.js', 'witch.js',
 ]) {
-    require(path.join(FUN, 'premade-weapons', file));
+    require(path.join(ARENA, 'premade-weapons', file));
 }
-require(path.join(FUN, 'premade-weapons/index.js'));
-require(path.join(FUN, 'premade-powerups/registry.js'));
-require(path.join(FUN, 'premade-powerups/power.js'));
-require(path.join(FUN, 'premade-powerups/speed.js'));
-require(path.join(FUN, 'premade-powerups/size.js'));
-require(path.join(FUN, 'premade-powerups/thorns.js'));
-require(path.join(FUN, 'premade-powerups/protection.js'));
-require(path.join(FUN, 'premade-powerups/apple.js'));
-require(path.join(FUN, 'premade-powerups/index.js'));
-require(path.join(FUN, 'workflow/bracket.js'));
-require(path.join(FUN, 'workflow/match-compose.js'));
-require(path.join(FUN, 'workflow/powerup-wheel.js'));
+require(path.join(ARENA, 'premade-weapons/index.js'));
+require(path.join(ARENA, 'premade-powerups/registry.js'));
+require(path.join(ARENA, 'premade-powerups/power.js'));
+require(path.join(ARENA, 'premade-powerups/speed.js'));
+require(path.join(ARENA, 'premade-powerups/size.js'));
+require(path.join(ARENA, 'premade-powerups/thorns.js'));
+require(path.join(ARENA, 'premade-powerups/protection.js'));
+require(path.join(ARENA, 'premade-powerups/apple.js'));
+require(path.join(ARENA, 'premade-powerups/index.js'));
+require(path.join(ARENA, 'workflow/bracket.js'));
+require(path.join(ARENA, 'workflow/match-compose.js'));
+require(path.join(ARENA, 'workflow/powerup-wheel.js'));
 
 function readJson(file) {
     return JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -215,23 +215,23 @@ const cmd = process.argv[2] || 'init';
 try {
     if (cmd === 'init') {
         cmdInit(
-            process.argv[3] || path.join(FUN, 'tests/_full_video_state.json'),
-            process.argv[4] || path.join(FUN, 'tests/_full_video_roster.json'),
+            process.argv[3] || path.join(ARENA, 'tests/_full_video_state.json'),
+            process.argv[4] || path.join(ARENA, 'tests/_full_video_roster.json'),
         );
     } else if (cmd === 'next') {
         cmdNext(
-            process.argv[3] || path.join(FUN, 'tests/_full_video_state.json'),
-            process.argv[4] || path.join(FUN, 'tests/_full_video_match.json'),
+            process.argv[3] || path.join(ARENA, 'tests/_full_video_state.json'),
+            process.argv[4] || path.join(ARENA, 'tests/_full_video_match.json'),
         );
     } else if (cmd === 'apply') {
         cmdApply(
-            process.argv[3] || path.join(FUN, 'tests/_full_video_state.json'),
+            process.argv[3] || path.join(ARENA, 'tests/_full_video_state.json'),
             process.argv.slice(4).join(' '),
         );
     } else if (cmd === 'options') {
         cmdSetOptions(
-            process.argv[3] || path.join(FUN, 'tests/_full_video_state.json'),
-            process.argv[4] || path.join(FUN, 'tests/_full_video_opts.json'),
+            process.argv[3] || path.join(ARENA, 'tests/_full_video_state.json'),
+            process.argv[4] || path.join(ARENA, 'tests/_full_video_opts.json'),
         );
     } else {
         throw new Error(`unknown command ${cmd}`);

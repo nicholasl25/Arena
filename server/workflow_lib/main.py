@@ -5,7 +5,7 @@ import os
 import sys
 from pathlib import Path
 
-from .config import FUN_DIR, PORT
+from .config import ARENA_DIR, PORT
 from .handler import QuietThreadingHTTPServer, WorkflowHandler
 from .pipeline_ops import ensure_stages
 
@@ -21,9 +21,9 @@ def _start_slack_bot_thread() -> None:
 
 
 def main() -> None:
-    # Prefer fun/venv site-packages. On Homebrew, venv/bin/python resolves to the
+    # Prefer Arena/venv site-packages. On Homebrew, venv/bin/python resolves to the
     # same binary as system python3 — compare sys.prefix, not resolved executable.
-    venv_dir = FUN_DIR / "venv"
+    venv_dir = ARENA_DIR / "venv"
     venv_python = venv_dir / "bin" / "python"
     if venv_python.is_file() and Path(sys.prefix).resolve() != venv_dir.resolve():
         os.execv(str(venv_python), [str(venv_python), *sys.argv])

@@ -102,7 +102,7 @@ def build_long_tournament_roster(
         # Placeholder until each match's weapon wheel assigns the real loadout.
         placeholder = picked[0]
         for i, skin in enumerate(skins):
-            color = _LONG_COLORS[i % len(_LONG_COLORS)]
+            color = skin.get("color") or _LONG_COLORS[i % len(_LONG_COLORS)]
             name = skin["name"]
             config = {
                 "weaponId": placeholder,
@@ -320,6 +320,7 @@ def produce_long_tournament(
             weapon_spin=bool(weapon_spin),
             powerup_spin=bool(powerup_spin),
             title=intro_title,
+            skin_folder=skin_folder if weapon_spin else None,
             fighters=fighters,
             champion_name=champion,
             base_url=f"http://127.0.0.1:{PORT}",
@@ -447,8 +448,10 @@ def tournament_stitch(body: dict | None = None) -> dict:
     if isinstance(bracket_state, dict) and isinstance(bracket_state.get("fighters"), list):
         fighters = bracket_state["fighters"]
     title = body.get("title")
+    folder = body.get("skinFolder") or body.get("skin_folder")
+    if not folder and fighters:
+        folder = ct.skin_folder_from_fighters(fighters)
     if not isinstance(title, str) or not title.strip():
-        folder = body.get("skinFolder") or body.get("skin_folder")
         title = ct.build_intro_title(
             names,
             skin_folder=folder if weapon_spin else None,
@@ -460,6 +463,7 @@ def tournament_stitch(body: dict | None = None) -> dict:
         weapon_spin=weapon_spin,
         powerup_spin=powerup_spin,
         title=title,
+        skin_folder=folder if weapon_spin else None,
         fighters=fighters,
         champion_name=champ_label,
         base_url=f"http://127.0.0.1:{PORT}",

@@ -14,8 +14,8 @@ import sys
 import time
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parents[1]
-PIPELINE_DIR = FUN_DIR / "pipeline"
+ARENA_DIR = Path(__file__).resolve().parents[1]
+PIPELINE_DIR = ARENA_DIR / "pipeline"
 sys.path.insert(0, str(PIPELINE_DIR))
 
 import compose_tournament as ct  # noqa: E402
@@ -23,7 +23,7 @@ import tournament_record as tr  # noqa: E402
 
 STARTED = time.time()
 BASE_URL = "http://127.0.0.1:8764"
-PLANNER = FUN_DIR / "tests" / "generate_full_video.js"
+PLANNER = ARENA_DIR / "tests" / "generate_full_video.js"
 
 
 def log(kind: str, msg: str) -> None:
@@ -39,8 +39,8 @@ def node(*args: str, check: bool = True) -> subprocess.CompletedProcess:
 
 
 def main() -> int:
-    state_path = FUN_DIR / "tests" / "_full_video_state.json"
-    match_path = FUN_DIR / "tests" / "_full_video_match.json"
+    state_path = ARENA_DIR / "tests" / "_full_video_state.json"
+    match_path = ARENA_DIR / "tests" / "_full_video_match.json"
     log("STEP", "init bracket")
     node("init", str(state_path))
 

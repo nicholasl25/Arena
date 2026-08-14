@@ -17,7 +17,7 @@ import tempfile
 import time
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
+ARENA_DIR = Path(__file__).resolve().parent.parent
 PIPELINE_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(PIPELINE_DIR))
 
@@ -142,8 +142,8 @@ def _match_in_state(state: dict | None, match: dict | None) -> dict | None:
     return match
 
 
-def _fun_python() -> str:
-    python = FUN_DIR / "venv" / "bin" / "python"
+def _arena_python() -> str:
+    python = ARENA_DIR / "venv" / "bin" / "python"
     return str(python if python.is_file() else Path(sys.executable))
 
 
@@ -153,8 +153,8 @@ def _require_playwright():
         return sync_playwright
     except ImportError:
         pass
-    # workflow_server often runs on system Python; Playwright lives in fun/venv.
-    venv = FUN_DIR / "venv"
+    # workflow_server often runs on system Python; Playwright lives in Arena/venv.
+    venv = ARENA_DIR / "venv"
     for pattern in ("lib/python*/site-packages", "lib/site-packages"):
         for path in venv.glob(pattern):
             if str(path) not in sys.path:
@@ -165,7 +165,7 @@ def _require_playwright():
     except ImportError as exc:
         raise RuntimeError(
             "playwright is required. Install with: "
-            f"{_fun_python()} -m pip install playwright"
+            f"{_arena_python()} -m pip install playwright"
         ) from exc
 
 
@@ -364,7 +364,7 @@ def _sync_bracket_to_arena_winner(bracket_pre: dict, winner_name: str) -> dict |
     name = str(winner_name or "").strip()
     if not name:
         return None
-    helper = FUN_DIR / "workflow" / "apply-arena-result.js"
+    helper = ARENA_DIR / "workflow" / "apply-arena-result.js"
     try:
         result = subprocess.run(
             ["node", str(helper)],
@@ -544,7 +544,7 @@ def record_arena_pair(
         "introMode": "skip",
         "view": "computer",
     }
-    executable = _fun_python()
+    executable = _arena_python()
     slog.log("arena: launch offline_record (stderr inherits for live frame logs)")
     with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as tmp:
         json.dump(payload, tmp)

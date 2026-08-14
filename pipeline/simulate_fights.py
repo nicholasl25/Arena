@@ -19,7 +19,7 @@ Payload JSON:
     }
 
 Requires: playwright (pip install playwright), Google Chrome.
-Server should be serving fun/ (default http://127.0.0.1:8764).
+Server should be serving Arena/ (default http://127.0.0.1:8764).
 """
 
 from __future__ import annotations
@@ -30,7 +30,7 @@ import sys
 import time
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
+ARENA_DIR = Path(__file__).resolve().parent.parent
 DEFAULT_BASE_URL = "http://127.0.0.1:8764"
 SIM_TIMEOUT_SEC = 120
 

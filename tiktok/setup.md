@@ -37,7 +37,7 @@ https://YOUR-NGROK.ngrok-free.app/callback
 ## 3. Configure this folder
 
 ```bash
-cd resources/web/fun/tiktok
+cd tiktok
 cp .env.example .env
 ```
 
@@ -49,14 +49,14 @@ TIKTOK_CLIENT_SECRET=...
 TIKTOK_REDIRECT_URI=https://YOUR-NGROK.ngrok-free.app/callback
 ```
 
-No extra venv — uses stdlib + the existing `fun` Python.
+No extra venv — uses stdlib + the existing Arena venv Python.
 
 ## 4. Sign in once
 
 Keep **ngrok** running, then:
 
 ```bash
-cd resources/web/fun
+# from the Arena repo root
 ./venv/bin/python tiktok/scripts/auth.py
 ```
 

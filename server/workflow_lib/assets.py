@@ -5,7 +5,7 @@ import json
 import re
 from pathlib import Path
 
-from .config import FUN_DIR, INTRO_EXTS, INTROS_DIR, SKIN_EXTS, SKINS_DIR
+from .config import ARENA_DIR, INTRO_EXTS, INTROS_DIR, SKIN_EXTS, SKINS_DIR
 
 
 def list_skin_files() -> list[str]:
@@ -162,7 +162,7 @@ def list_weapon_options() -> list[dict]:
 
 def list_powerup_options() -> list[dict]:
     """Parse premade-powerups/*.js register() ids → [{id, name}]."""
-    folder = FUN_DIR / "premade-powerups"
+    folder = ARENA_DIR / "premade-powerups"
     out: dict[str, str] = {}
     if not folder.is_dir():
         return []
@@ -179,9 +179,10 @@ def list_powerup_options() -> list[dict]:
 
 
 def list_skin_options() -> list[dict]:
-    """Weapon-arena skins → [{id, name}] with category prefix when nested."""
+    """Weapon-arena skins → [{id, name, color?}] with category prefix when nested."""
     if not SKINS_DIR.is_dir():
         return []
+    color_cache: dict[str, dict[str, str]] = {}
     out: list[dict] = []
     for path in sorted(SKINS_DIR.rglob("*")):
         if not path.is_file() or path.suffix.lower() not in SKIN_EXTS:
@@ -191,9 +192,17 @@ def list_skin_options() -> list[dict]:
             continue
         skin_id = path.stem.lower()
         label = path.stem.replace("-", " ").replace("_", " ")
-        if len(rel.parts) > 1:
-            label = f"{rel.parts[0]} / {label}"
-        out.append({"id": skin_id, "name": label})
+        category = rel.parts[0] if len(rel.parts) > 1 else ""
+        if category:
+            label = f"{category} / {label}"
+        row = {"id": skin_id, "name": label}
+        if category:
+            if category not in color_cache:
+                color_cache[category] = load_folder_colors(category)
+            color = color_cache[category].get(skin_id)
+            if color:
+                row["color"] = color
+        out.append(row)
     out.sort(key=lambda r: r["name"].lower())
     return out
 
@@ -221,19 +230,47 @@ def list_intro_options() -> list[dict]:
     return sorted(out, key=lambda r: r["name"].lower())
 
 
+def load_folder_colors(category: str) -> dict[str, str]:
+    """skins/<category>/colors.json → {skin_id: #rrggbb}."""
+    cat = (category or "").strip()
+    if not cat:
+        return {}
+    path = SKINS_DIR / cat / "colors.json"
+    if not path.is_file():
+        return {}
+    try:
+        data = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return {}
+    if not isinstance(data, dict):
+        return {}
+    out: dict[str, str] = {}
+    for key, value in data.items():
+        if not isinstance(value, str):
+            continue
+        hex_color = value.strip().lower()
+        if re.fullmatch(r"#[0-9a-f]{6}", hex_color):
+            out[str(key).strip().lower()] = hex_color
+    return out
+
+
 def list_skins_in_category(category: str) -> list[dict]:
-    """Skins inside skins/<category>/ → [{id, name, file}]."""
+    """Skins inside skins/<category>/ → [{id, name, file, color?}]."""
     cat = (category or "").strip()
     if not cat or cat.lower() in {"none", "default"}:
         return []
     folder = SKINS_DIR / cat
     if not folder.is_dir():
         raise ValueError(f"unknown skin folder: {cat}")
+    colors = load_folder_colors(cat)
     out: list[dict] = []
     for path in sorted(folder.iterdir()):
         if not path.is_file() or path.suffix.lower() not in SKIN_EXTS:
             continue
         skin_id = path.stem.lower()
         label = path.stem.replace("-", " ").replace("_", " ")
-        out.append({"id": skin_id, "name": label, "file": path.name})
+        row = {"id": skin_id, "name": label, "file": path.name}
+        if skin_id in colors:
+            row["color"] = colors[skin_id]
+        out.append(row)
     return out

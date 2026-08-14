@@ -7,8 +7,8 @@ import sys
 import unittest
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(FUN_DIR / "pipeline"))
+ARENA_DIR = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ARENA_DIR / "pipeline"))
 
 import compose_short as cs  # noqa: E402
 

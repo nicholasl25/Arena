@@ -24,14 +24,14 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
+ARENA_DIR = Path(__file__).resolve().parent.parent
 PIPELINE_DIR = Path(__file__).resolve().parent
 if str(PIPELINE_DIR) not in sys.path:
     sys.path.insert(0, str(PIPELINE_DIR))
 
 import step_log as slog  # noqa: E402
 
-RECORDINGS_RAW = FUN_DIR / "recordings" / "raw"
+RECORDINGS_RAW = ARENA_DIR / "recordings" / "raw"
 DEFAULT_BASE_URL = "http://127.0.0.1:8764"
 # Wall-clock safety: html fights can be long; refuse to hang the workflow forever.
 RECORD_TIMEOUT_SEC = 600

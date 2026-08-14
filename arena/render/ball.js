@@ -53,6 +53,8 @@
         const fraction = Math.max(0, Math.min(1, ball.healthFraction?.() ?? 1));
         const fillColor = ball.color || '#888';
         const fullHealth = fraction >= 0.999;
+        const start = -Math.PI / 2;
+        const end = start + fraction * Math.PI * 2;
 
         ctx.save();
         ctx.beginPath();
@@ -70,8 +72,7 @@
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(cx, cy);
-                const start = -Math.PI / 2;
-                ctx.arc(cx, cy, r, start, start + fraction * Math.PI * 2);
+                ctx.arc(cx, cy, r, start, end);
                 ctx.closePath();
                 ctx.clip();
                 ctx.drawImage(skinImg, cx - r, cy - r, r * 2, r * 2);
@@ -89,14 +90,28 @@
                 ctx.save();
                 ctx.beginPath();
                 ctx.moveTo(cx, cy);
-                const start = -Math.PI / 2;
-                ctx.arc(cx, cy, r, start, start + fraction * Math.PI * 2);
+                ctx.arc(cx, cy, r, start, end);
                 ctx.closePath();
                 ctx.clip();
                 ctx.fillStyle = fillColor;
                 ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
                 ctx.restore();
             }
+        }
+
+        // Radial pie cuts — skins need these; solid colors read without them, but
+        // draw either way so depleted health always has a clear black divider.
+        if (!fullHealth && fraction > 0.001) {
+            const cut = Math.max(1.5, r * 0.06);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = cut;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(start) * r, cy + Math.sin(start) * r);
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(end) * r, cy + Math.sin(end) * r);
+            ctx.stroke();
         }
 
         ctx.restore();
@@ -175,6 +190,9 @@
             drawEnchantGlint(ctx, cx, cy, r, timeSec, { soft: Boolean(skinImg) });
         }
 
+        // Health pie / glint replace the path — rebuild the rim before stroking.
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
         ctx.strokeStyle = '#000';
         ctx.lineWidth = ballStroke;
         ctx.stroke();

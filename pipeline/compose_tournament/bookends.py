@@ -64,11 +64,21 @@ def build_intro_script(
     *,
     weapon_spin: bool = False,
     powerup_spin: bool = False,
+    skin_folder: str | None = None,
+    title: str | None = None,
+    weapon_mode: bool | None = None,
+    entrant_count: int | None = None,
 ) -> str:
     clean = [str(name).strip() for name in (names or []) if str(name).strip()]
     if not clean:
         return ""
-    bits = ["Welcome to the Ball Arena tournament."]
+    heading = (title or "").strip() or build_intro_title(
+        clean,
+        skin_folder=skin_folder,
+        weapon_mode=weapon_mode if weapon_mode is not None else (not weapon_spin),
+        entrant_count=entrant_count if entrant_count is not None else len(clean),
+    )
+    bits = [f"Welcome to the {heading}."]
     # Listing every name gets unusable past a small field — speak the count instead.
     if len(clean) > 8:
         bits.append(f"{len(clean)} competitors enter the arena.")
@@ -113,6 +123,33 @@ def is_skin_tournament(state: dict | None) -> bool:
     )
 
 
+def skin_folder_from_fighters(fighters: list | None) -> str | None:
+    """Best-effort folder name from skin ids (e.g. NBA Teams)."""
+    if not isinstance(fighters, list):
+        return None
+    skins_root = config.ARENA_DIR / "skins"
+    if not skins_root.is_dir():
+        return None
+    cats: set[str] = set()
+    for fighter in fighters:
+        if not isinstance(fighter, dict):
+            continue
+        sid = str(fighter.get("skinId") or fighter.get("id") or "").strip().lower()
+        if not sid or sid == "_weapon":
+            continue
+        stem = sid.rsplit("/", 1)[-1]
+        for path in skins_root.rglob("*"):
+            if not path.is_file() or path.stem.lower() != stem:
+                continue
+            rel = path.relative_to(skins_root)
+            if len(rel.parts) > 1 and rel.parts[0].lower() != "default":
+                cats.add(rel.parts[0])
+            break
+    if len(cats) == 1:
+        return next(iter(cats))
+    return None
+
+
 def ensure_intro_clip(
     names: list | None,
     *,
@@ -120,24 +157,34 @@ def ensure_intro_clip(
     powerup_spin: bool = False,
     script: str | None = None,
     title: str | None = None,
+    skin_folder: str | None = None,
     fighters: list | None = None,
     champion_name: str | None = None,
     base_url: str | None = None,
     weapon_mode: bool | None = None,
 ) -> Path | None:
     """Title + roster card, setup TTS, black karaoke captions. None if nothing to say."""
+    config.ensure_dirs()
+    out = config.CLIPS_DIR / "intro.mp4"
+    count = len([n for n in (names or []) if str(n).strip()])
+    show_mode = weapon_mode if weapon_mode is not None else (not weapon_spin)
+    heading = (title or "").strip() or build_intro_title(
+        names,
+        skin_folder=skin_folder,
+        weapon_mode=show_mode,
+        entrant_count=count,
+    )
     text = (script or "").strip() or build_intro_script(
-        names, weapon_spin=weapon_spin, powerup_spin=powerup_spin
+        names,
+        weapon_spin=weapon_spin,
+        powerup_spin=powerup_spin,
+        skin_folder=skin_folder,
+        title=heading,
+        weapon_mode=show_mode,
+        entrant_count=count,
     )
     if not text:
         return None
-    config.ensure_dirs()
-    out = config.CLIPS_DIR / "intro.mp4"
-    heading = (title or "").strip() or build_intro_title(
-        names,
-        weapon_mode=weapon_mode if weapon_mode is not None else (not weapon_spin),
-        entrant_count=len([n for n in (names or []) if str(n).strip()]),
-    )
     roster = fighters if isinstance(fighters, list) else None
     show_weapons = bool(weapon_mode) if weapon_mode is not None else (not weapon_spin)
     slog.log(f"intro: {text}")

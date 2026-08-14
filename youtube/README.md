@@ -5,7 +5,7 @@ Self-contained upload + voiceover tooling for Ball Arena recordings.
 ## One-time setup
 
 ```bash
-cd resources/web/fun/youtube
+cd youtube
 cp .env.example .env          # add YT_CLIENT_ID + YT_CLIENT_SECRET
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
@@ -16,7 +16,7 @@ See [setup.md](setup.md) for Google Cloud OAuth steps.
 
 ## Run
 
-Edit CONFIG in `pipeline/compose_short.py`, then from `fun/`:
+Edit CONFIG in `pipeline/compose_short.py`, then from `Arena/`:
 
 ```bash
 python pipeline/compose_short.py       # voiceover + captions only

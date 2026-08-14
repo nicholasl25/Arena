@@ -3,22 +3,22 @@ from __future__ import annotations
 
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent.parent
+ARENA_DIR = Path(__file__).resolve().parent.parent.parent
 SERVER_DIR = Path(__file__).resolve().parent.parent
-PIPELINE_DIR = FUN_DIR / "pipeline"
-RECORDINGS = FUN_DIR / "recordings"
+PIPELINE_DIR = ARENA_DIR / "pipeline"
+RECORDINGS = ARENA_DIR / "recordings"
 STAGES = {
     "raw": RECORDINGS / "raw",
     "composed": RECORDINGS / "composed",
     "posted": RECORDINGS / "posted",
 }
-SKINS_DIR = FUN_DIR / "skins"
-INTROS_DIR = FUN_DIR / "intros"
+SKINS_DIR = ARENA_DIR / "skins"
+INTROS_DIR = ARENA_DIR / "intros"
 SKIN_EXTS = {".png", ".jpg", ".jpeg", ".webp", ".gif"}
 INTRO_EXTS = SKIN_EXTS
-YT_DIR = FUN_DIR / "youtube"
+YT_DIR = ARENA_DIR / "youtube"
 YT_SCRIPTS = YT_DIR / "scripts"
-TIKTOK_DIR = FUN_DIR / "tiktok"
+TIKTOK_DIR = ARENA_DIR / "tiktok"
 TIKTOK_SCRIPTS = TIKTOK_DIR / "scripts"
 SETUP_PATH = SERVER_DIR / "auto_post_setup.json"
 JOBS_DIR = SERVER_DIR / "candidate_jobs"

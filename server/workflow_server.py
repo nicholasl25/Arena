@@ -2,7 +2,7 @@
 """
 Local server for the Shorts production workflow UI.
 
-Serves static files from fun/ and exposes a small JSON API for pipeline state,
+Serves static files from Arena/ and exposes a small JSON API for pipeline state,
 script/caption drafts, compose, and YouTube upload. Slack bot (Socket Mode)
 starts alongside when server/.env has tokens — see server/slack_bot.py.
 
@@ -44,7 +44,7 @@ from workflow_lib.captions import (
 from workflow_lib.config import (
     CATEGORY_DEFAULT,
     DEFAULT_DAILY_QUOTA,
-    FUN_DIR,
+    ARENA_DIR,
     INTROS_DIR,
     INTRO_EXTS,
     JOBS_DIR,

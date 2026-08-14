@@ -8,6 +8,7 @@
  * Discovery order:
  *   1. GET /api/skins (when server/workflow_server.py is running — rescans the folder)
  *   2. skins/manifest.json (written by the server, or edit by hand)
+ * Default ball tint comes from skins/<folder>/colors.json when present.
  *
  * Exposes: window.BallSkins
  */
@@ -47,6 +48,14 @@
         return FALLBACK_COLORS[i % FALLBACK_COLORS.length];
     }
 
+    function isHexColor(value) {
+        return typeof value === 'string' && /^#[0-9a-fA-F]{6}$/.test(value);
+    }
+
+    function normalizeHex(value) {
+        return isHexColor(value) ? value.toLowerCase() : null;
+    }
+
     function categoryFromFile(file) {
         const i = String(file || '').lastIndexOf('/');
         if (i <= 0) return 'Other';
@@ -58,6 +67,44 @@
             .toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
             .replace(/^-+|-+$/g, '') || 'other';
+    }
+
+    /** @type {Record<string, Record<string, string>>} */
+    const colorMaps = {};
+
+    async function loadFolderColors(category) {
+        const cat = String(category || '');
+        if (!cat || colorMaps[cat]) return colorMaps[cat] || {};
+        try {
+            const res = await fetch(`skins/${encodeURIComponent(cat)}/colors.json`);
+            if (!res.ok) {
+                colorMaps[cat] = {};
+                return {};
+            }
+            const data = await res.json();
+            const map = {};
+            if (data && typeof data === 'object' && !Array.isArray(data)) {
+                for (const [key, value] of Object.entries(data)) {
+                    const hex = normalizeHex(value);
+                    if (hex) map[String(key).toLowerCase()] = hex;
+                }
+            }
+            colorMaps[cat] = map;
+            return map;
+        } catch {
+            colorMaps[cat] = {};
+            return {};
+        }
+    }
+
+    function applyLoadedColors() {
+        for (const id of skinOrder) {
+            const spec = SKINS[id];
+            if (!spec) continue;
+            const stem = id.includes('/') ? id.slice(id.lastIndexOf('/') + 1) : id;
+            const hex = colorMaps[spec.category]?.[stem] || colorMaps[spec.category]?.[id];
+            if (hex) spec.color = hex;
+        }
     }
 
     function buildCatalog(files) {
@@ -82,12 +129,13 @@
                 }
                 claimedStem.add(stem);
                 order.push(id);
+                const mapped = colorMaps[category]?.[stem];
                 next[id] = {
                     id,
                     name: nameFromFilename(file),
                     image: `skins/${file}`,
                     category,
-                    color: colorForIndex(i),
+                    color: mapped || colorForIndex(i),
                 };
             });
         SKINS = next;
@@ -125,7 +173,14 @@
         if (initPromise) return initPromise;
         initPromise = (async () => {
             const files = await fetchSkinFiles();
+            const categories = new Set(
+                files
+                    .filter((f) => typeof f === 'string' && SKIN_EXTS.test(f))
+                    .map((f) => categoryFromFile(f)),
+            );
+            await Promise.all([...categories].map((cat) => loadFolderColors(cat)));
             buildCatalog(files);
+            applyLoadedColors();
             preloadAll();
         })();
         return initPromise;

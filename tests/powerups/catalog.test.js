@@ -5,26 +5,26 @@
 
 const assert = require('assert');
 const path = require('path');
-const FUN = path.join(__dirname, '../..');
+const ARENA = path.join(__dirname, '../..');
 
 global.window = global;
-require(path.join(FUN, 'premade-weapons/registry.js'));
+require(path.join(ARENA, 'premade-weapons/registry.js'));
 for (const file of [
     'sword.js', 'dagger.js', 'spikes.js', 'slingshot.js', 'bow.js', 'basketball.js',
     'hammer.js', 'fists.js', 'laser.js', 'staff.js', 'shield.js', 'webs.js',
     'boomerang.js', 'grenade.js', 'thunderrod.js', 'witch.js',
 ]) {
-    require(path.join(FUN, 'premade-weapons', file));
+    require(path.join(ARENA, 'premade-weapons', file));
 }
-require(path.join(FUN, 'premade-weapons/index.js'));
-require(path.join(FUN, 'premade-powerups/registry.js'));
-require(path.join(FUN, 'premade-powerups/power.js'));
-require(path.join(FUN, 'premade-powerups/speed.js'));
-require(path.join(FUN, 'premade-powerups/size.js'));
-require(path.join(FUN, 'premade-powerups/thorns.js'));
-require(path.join(FUN, 'premade-powerups/protection.js'));
-require(path.join(FUN, 'premade-powerups/apple.js'));
-require(path.join(FUN, 'premade-powerups/index.js'));
+require(path.join(ARENA, 'premade-weapons/index.js'));
+require(path.join(ARENA, 'premade-powerups/registry.js'));
+require(path.join(ARENA, 'premade-powerups/power.js'));
+require(path.join(ARENA, 'premade-powerups/speed.js'));
+require(path.join(ARENA, 'premade-powerups/size.js'));
+require(path.join(ARENA, 'premade-powerups/thorns.js'));
+require(path.join(ARENA, 'premade-powerups/protection.js'));
+require(path.join(ARENA, 'premade-powerups/apple.js'));
+require(path.join(ARENA, 'premade-powerups/index.js'));
 
 function meleeBall(extra = {}) {
     return {

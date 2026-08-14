@@ -12,8 +12,8 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
-PROGRESS_PATH = FUN_DIR / "recordings" / "composed" / "tournament" / "progress.json"
+ARENA_DIR = Path(__file__).resolve().parent.parent
+PROGRESS_PATH = ARENA_DIR / "recordings" / "composed" / "tournament" / "progress.json"
 
 _t0 = time.perf_counter()
 

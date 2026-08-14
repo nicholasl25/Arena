@@ -173,7 +173,13 @@
     }
 
     P.defaultColorFor = function defaultColorFor(id, slotIndex = 0) {
-        if (P.gameMode === 'weapon') return P.weaponThemeColorForIndex(slotIndex);
+        if (P.gameMode === 'weapon') {
+            const skinColor = P.SK?.getSkin?.(id)?.color;
+            if (typeof skinColor === 'string' && /^#[0-9a-fA-F]{6}$/.test(skinColor)) {
+                return skinColor.toLowerCase();
+            }
+            return P.weaponThemeColorForIndex(slotIndex);
+        }
         return P.PB.getPremadeBall(id)?.color ?? '#888888';
     }
 

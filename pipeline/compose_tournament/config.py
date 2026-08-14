@@ -4,10 +4,10 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent.parent
+ARENA_DIR = Path(__file__).resolve().parent.parent.parent
 PIPELINE_DIR = Path(__file__).resolve().parent.parent
 
-RECORDINGS = FUN_DIR / "recordings"
+RECORDINGS = ARENA_DIR / "recordings"
 TOURNAMENT_DIR = RECORDINGS / "composed" / "tournament"
 SEGMENTS_DIR = TOURNAMENT_DIR / "segments"
 CLIPS_DIR = TOURNAMENT_DIR / "clips"

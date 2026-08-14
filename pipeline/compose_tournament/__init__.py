@@ -31,6 +31,7 @@ from .bookends import (
     is_skin_tournament,
     join_spoken_names,
     pick_champion_fighters,
+    skin_folder_from_fighters,
 )
 from .captions import align_caption_words, build_bookend_ass
 from .chapters import (
@@ -46,7 +47,7 @@ from .cli import main
 from .config import (
     FINAL_NAME,
     FPS,
-    FUN_DIR,
+    ARENA_DIR,
     HEIGHT,
     INTRO_CAPTION_OUTLINE,
     INTRO_CAPTION_PRIMARY,

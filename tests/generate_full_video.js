@@ -11,7 +11,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const FUN = path.join(__dirname, '..');
+const ARENA = path.join(__dirname, '..');
 const STARTED = Date.now();
 
 function log(kind, msg) {
@@ -20,17 +20,17 @@ function log(kind, msg) {
 }
 
 global.window = global;
-require(path.join(FUN, 'premade-powerups/registry.js'));
-require(path.join(FUN, 'premade-powerups/power.js'));
-require(path.join(FUN, 'premade-powerups/speed.js'));
-require(path.join(FUN, 'premade-powerups/size.js'));
-require(path.join(FUN, 'premade-powerups/thorns.js'));
-require(path.join(FUN, 'premade-powerups/protection.js'));
-require(path.join(FUN, 'premade-powerups/apple.js'));
-require(path.join(FUN, 'premade-powerups/index.js'));
-require(path.join(FUN, 'workflow/bracket.js'));
-require(path.join(FUN, 'workflow/match-compose.js'));
-require(path.join(FUN, 'workflow/powerup-wheel.js'));
+require(path.join(ARENA, 'premade-powerups/registry.js'));
+require(path.join(ARENA, 'premade-powerups/power.js'));
+require(path.join(ARENA, 'premade-powerups/speed.js'));
+require(path.join(ARENA, 'premade-powerups/size.js'));
+require(path.join(ARENA, 'premade-powerups/thorns.js'));
+require(path.join(ARENA, 'premade-powerups/protection.js'));
+require(path.join(ARENA, 'premade-powerups/apple.js'));
+require(path.join(ARENA, 'premade-powerups/index.js'));
+require(path.join(ARENA, 'workflow/bracket.js'));
+require(path.join(ARENA, 'workflow/match-compose.js'));
+require(path.join(ARENA, 'workflow/powerup-wheel.js'));
 
 const roster = [
     { weaponId: 'hammer', name: 'Hammer', color: '#f97316' },

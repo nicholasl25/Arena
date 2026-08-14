@@ -15,7 +15,7 @@ from .assets import write_intro_manifest, write_skin_manifest
 from .config import (
     CATEGORY_DEFAULT,
     DEFAULT_DAILY_QUOTA,
-    FUN_DIR,
+    ARENA_DIR,
     PIPELINE_DIR,
     PORT,
     PRIVACY_DEFAULT,
@@ -294,8 +294,8 @@ def offline_record_video(
     if not isinstance(matchup, list) or len(matchup) < 2:
         raise ValueError("matchup must include at least 2 fighters")
 
-    fun_venv = FUN_DIR / "venv" / "bin" / "python"
-    py = str(fun_venv if fun_venv.is_file() else sys.executable)
+    arena_venv = ARENA_DIR / "venv" / "bin" / "python"
+    py = str(arena_venv if arena_venv.is_file() else sys.executable)
 
     payload: dict = {"mode": mode, "matchup": matchup}
     if intro_mode and intro_mode != "skip":

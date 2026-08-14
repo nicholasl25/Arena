@@ -6,19 +6,19 @@
 const assert = require('assert');
 const path = require('path');
 
-const FUN = path.join(__dirname, '../..');
+const ARENA = path.join(__dirname, '../..');
 global.window = global;
-require(path.join(FUN, 'premade-weapons/registry.js'));
-require(path.join(FUN, 'premade-weapons/sword.js'));
-require(path.join(FUN, 'premade-weapons/dagger.js'));
-require(path.join(FUN, 'premade-weapons/hammer.js'));
-require(path.join(FUN, 'premade-weapons/spikes.js'));
-require(path.join(FUN, 'premade-weapons/slingshot.js'));
-require(path.join(FUN, 'premade-weapons/bow.js'));
-require(path.join(FUN, 'premade-weapons/basketball.js'));
-require(path.join(FUN, 'premade-weapons/staff.js'));
-require(path.join(FUN, 'premade-weapons/grenade.js'));
-require(path.join(FUN, 'premade-weapons/index.js'));
+require(path.join(ARENA, 'premade-weapons/registry.js'));
+require(path.join(ARENA, 'premade-weapons/sword.js'));
+require(path.join(ARENA, 'premade-weapons/dagger.js'));
+require(path.join(ARENA, 'premade-weapons/hammer.js'));
+require(path.join(ARENA, 'premade-weapons/spikes.js'));
+require(path.join(ARENA, 'premade-weapons/slingshot.js'));
+require(path.join(ARENA, 'premade-weapons/bow.js'));
+require(path.join(ARENA, 'premade-weapons/basketball.js'));
+require(path.join(ARENA, 'premade-weapons/staff.js'));
+require(path.join(ARENA, 'premade-weapons/grenade.js'));
+require(path.join(ARENA, 'premade-weapons/index.js'));
 
 assert.strictEqual(PremadeWeapons.iconUrl('sword'), 'premade-weapons/sprites/Sword.png');
 assert.strictEqual(PremadeWeapons.iconUrl('hammer'), 'premade-weapons/sprites/Stone_Hammer.png');

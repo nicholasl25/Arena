@@ -31,8 +31,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-FUN_DIR = Path(__file__).resolve().parent.parent
-_YT_DIR = FUN_DIR / "youtube"
+ARENA_DIR = Path(__file__).resolve().parent.parent
+_YT_DIR = ARENA_DIR / "youtube"
 
 # Re-exec with youtube/.venv (has edge-tts) only when run as a script.
 # Never execv on import — workflow_server loads this module in-process; replacing
@@ -54,7 +54,7 @@ except ImportError:
             f"python3 -m venv {_YT_DIR}/.venv && "
             f"{_YT_DIR}/.venv/bin/pip install -r {_YT_DIR}/requirements.txt"
         )
-    # Imported by workflow_server (fun/venv): draft/helpers are fine; TTS compose
+    # Imported by workflow_server (Arena/venv): draft/helpers are fine; TTS compose
     # still runs as a subprocess via youtube/.venv.
 
 # ============ CONFIG — edit these ============
@@ -117,10 +117,10 @@ KEEP_INTERMEDIATES = False  # keep the .vo.mp3 / .ass files next to the output
 
 # =============================================
 
-RECORDINGS_DIR = FUN_DIR / "recordings"
-BALLS_DIR = FUN_DIR / "premade-balls"
-SKINS_DIR = FUN_DIR / "skins"
-WEAPONS_DIR = FUN_DIR / "premade-weapons"
+RECORDINGS_DIR = ARENA_DIR / "recordings"
+BALLS_DIR = ARENA_DIR / "premade-balls"
+SKINS_DIR = ARENA_DIR / "skins"
+WEAPONS_DIR = ARENA_DIR / "premade-weapons"
 
 
 # ---------- fighter data from premade-balls/*.js ----------

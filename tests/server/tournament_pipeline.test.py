@@ -9,8 +9,8 @@ from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
-FUN_DIR = Path(__file__).resolve().parents[2]
-SERVER_DIR = FUN_DIR / "server"
+ARENA_DIR = Path(__file__).resolve().parents[2]
+SERVER_DIR = ARENA_DIR / "server"
 sys.path.insert(0, str(SERVER_DIR))
 
 import workflow_server as server  # noqa: E402
