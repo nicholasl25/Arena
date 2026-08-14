@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Powerup Wheel</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ece8e1;
+            --surface: #f5f1ea;
+            --card: #faf7f1;
+            --text: #111111;
+            --muted: rgba(0, 0, 0, 0.5);
+            --accent: #d97706;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", system-ui, sans-serif;
+        }
+        .wheel-page {
+            min-height: 100dvh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 12px;
+            padding: 16px;
+        }
+        .wheel-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .wheel-title {
+            margin: 0;
+            font-family: "Russo One", "DM Sans", sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            letter-spacing: 0.04em;
+        }
+        .wheel-status {
+            font-size: 14px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .wheel-stage {
+            display: grid;
+            place-items: center;
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 0;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65) inset,
+                0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        #wheel-canvas {
+            display: block;
+            width: min(100%, calc((100dvh - 140px) * 16 / 9));
+            max-height: calc(100dvh - 140px);
+            aspect-ratio: 16 / 9;
+            background: #292524;
+            cursor: pointer;
+        }
+        .wheel-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .wheel-hint {
+            margin: 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .wheel-spin {
+            appearance: none;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            background: var(--card);
+            color: var(--text);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .wheel-spin:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body class="wheel-page">
+    <header class="wheel-head">
+        <h1 class="wheel-title">Powerup Wheel</h1>
+        <span class="wheel-status" id="wheel-status">Sandbox — spins stay on this page</span>
+    </header>
+    <div class="wheel-stage">
+        <canvas id="wheel-canvas" width="1280" height="720" aria-label="Powerup wheel sandbox"></canvas>
+    </div>
+    <footer class="wheel-foot">
+        <p class="wheel-hint">Dummy fighters only. Click the wheel, press Space, or use Spin again.</p>
+        <button type="button" class="wheel-spin" id="btn-spin">Spin again</button>
+    </footer>
+
+    <script src="premade-powerups/registry.js"></script>
+    <script src="premade-powerups/power.js"></script>
+    <script src="premade-powerups/speed.js"></script>
+    <script src="premade-powerups/size.js"></script>
+    <script src="premade-powerups/protection.js"></script>
+    <script src="premade-powerups/thorns.js"></script>
+    <script src="premade-powerups/apple.js"></script>
+    <script src="premade-powerups/index.js"></script>
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="workflow/powerup-wheel.js?v=14"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const canvas = document.getElementById('wheel-canvas');
+            const statusEl = document.getElementById('wheel-status');
+            const btn = document.getElementById('btn-spin');
+            const ctx = canvas.getContext('2d');
+            const Wheel = window.PowerupWheel;
+            if (!canvas || !ctx || !Wheel) return;
+
+            const DUMMIES = [
+                { name: 'Alpha', color: '#dc2626' },
+                { name: 'Beta', color: '#2563eb' },
+            ];
+
+            let spinA = null;
+            let spinB = null;
+            let startedAt = 0;
+            let tickElapsed = -1;
+            let raf = 0;
+
+            function cssSize() {
+                const maxH = Math.max(180, window.innerHeight - 140);
+                const cssW = Math.min(canvas.parentElement?.clientWidth || 1280, maxH * 16 / 9);
+                const cssH = cssW * 9 / 16;
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                canvas.style.width = `${cssW}px`;
+                canvas.style.height = `${cssH}px`;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                return { w: cssW, h: cssH };
+            }
+
+            function setStatus(text) {
+                if (statusEl) statusEl.textContent = text;
+            }
+
+            function beginSpin() {
+                window.ArenaAudio?.unlock?.();
+                spinA = Wheel.createSpin({ fighter: DUMMIES[0], delayMs: 0 });
+                spinB = Wheel.createSpin({ fighter: DUMMIES[1], delayMs: 650 });
+                tickElapsed = -1;
+                startedAt = performance.now();
+                Wheel.preloadIcons?.([...(spinA.slices || []), ...(spinB.slices || [])]);
+                setStatus('Spinning…');
+            }
+
+            function frame(now) {
+                const { w, h } = cssSize();
+                const elapsed = now - startedAt;
+                if (spinA && spinB) {
+                    Wheel.playDueTicks?.(spinA, tickElapsed, elapsed);
+                    Wheel.playDueTicks?.(spinB, tickElapsed, elapsed);
+                    tickElapsed = elapsed;
+                    if (Wheel.isPairDone(spinA, spinB, elapsed)) {
+                        setStatus(`${spinA.resultName}  ·  ${spinB.resultName}`);
+                    }
+                }
+                Wheel.drawScene(ctx, {
+                    width: w,
+                    height: h,
+                    spinA,
+                    spinB,
+                    elapsedMs: elapsed,
+                    title: 'SANDBOX',
+                });
+                raf = requestAnimationFrame(frame);
+            }
+
+            beginSpin();
+            raf = requestAnimationFrame(frame);
+
+            btn?.addEventListener('click', beginSpin);
+            canvas.addEventListener('pointerdown', () => {
+                window.ArenaAudio?.unlock?.();
+                if (spinA && spinB && Wheel.isPairDone(spinA, spinB, performance.now() - startedAt)) {
+                    beginSpin();
+                }
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat) {
+                    e.preventDefault();
+                    beginSpin();
+                }
+            });
+        }());
+    </script>
+</body>
+</html>

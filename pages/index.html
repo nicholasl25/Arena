@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Ball Arena</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=Orbitron:wght@700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="arena/arena.css?v=7">
+</head>
+<body class="arena-page">
+    <script>
+        (function () {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('view') === 'computer') {
+                document.body.classList.add('arena-computer');
+                document.title = 'Ball Arena — Computer';
+            }
+        }());
+    </script>
+    <div class="page" id="arena-presentation">
+        <div class="arena-intro-layer" id="arena-intro-layer" hidden>
+            <canvas id="arena-intro-canvas" aria-hidden="true"></canvas>
+            <div class="arena-intro-vs-mark" aria-hidden="true">VS</div>
+        </div>
+        <header class="page-header">
+            <h1 class="event-title">Ball Arena</h1>
+            <div class="contestant-titles" id="contestant-titles" aria-label="Contestants"></div>
+        </header>
+
+        <div class="stage-wrap">
+            <div class="stage-controls">
+                <button type="button" class="stage-btn" id="btn-pause">Pause</button>
+                <button type="button" class="stage-btn" id="btn-clear">Clear</button>
+                <button type="button" class="stage-btn" id="btn-reset">Redo</button>
+            </div>
+            <div class="stage-letterbox" id="stage-letterbox">
+                <canvas id="arena-canvas"></canvas>
+            </div>
+            <div class="win-odds" id="win-odds" hidden aria-label="Win probability"></div>
+        </div>
+
+        <section class="contestant-roster" id="contestant-roster" aria-label="Contestant details"></section>
+    </div>
+
+    <aside class="setup-panel" id="setup-panel" aria-label="Match setup">
+        <div class="setup-panel-inner">
+            <header class="setup-panel-header">
+                <p class="setup-panel-eyebrow">Ball Arena</p>
+                <h2 class="setup-panel-title">Match Setup</h2>
+                <div class="setup-mode-toggle" id="setup-mode-toggle" role="group" aria-label="Game mode"></div>
+                <p class="setup-panel-hint">Pick fighters and tune stats, then start the fight.</p>
+            </header>
+            <div class="setup-panel-body">
+                <div class="setup-all-stats" id="setup-all-stats"></div>
+                <div class="setup-slots" id="setup-slots"></div>
+            </div>
+            <footer class="setup-panel-footer">
+                <button type="button" class="setup-btn setup-btn-secondary" id="btn-add-fighter">+ Add fighter</button>
+                <button type="button" class="setup-btn setup-btn-primary" id="btn-start-fight">Start fight</button>
+            </footer>
+        </div>
+    </aside>
+
+    <aside class="record-panel" id="record-panel" aria-label="Arena view recorder">
+        <div class="record-panel-inner">
+            <header class="record-panel-header">
+                <p class="record-panel-eyebrow">Export</p>
+                <h2 class="record-panel-title" id="record-panel-title">Record iPhone View</h2>
+            </header>
+            <div class="record-panel-body">
+                <p class="record-status" id="record-status" hidden></p>
+                <p class="record-timer" id="record-timer" aria-live="polite"></p>
+                <div class="record-actions" id="record-actions-main">
+                    <button type="button" class="record-btn record-btn-secondary" id="btn-record-prepare" hidden>Prepare screen capture</button>
+                    <button type="button" class="record-btn record-btn-primary" id="btn-record-restart">Record &amp; restart</button>
+                    <button type="button" class="record-btn record-btn-secondary" id="btn-record-stop" disabled>Stop</button>
+                </div>
+                <div class="record-actions record-actions-row" id="record-post-save">
+                    <button type="button" class="record-btn record-btn-done" id="btn-record-done" disabled>Done</button>
+                    <button type="button" class="record-btn record-btn-rerecord" id="btn-record-rerecord" disabled>Rerecord</button>
+                </div>
+                <p class="record-hint" id="record-hint"></p>
+            </div>
+        </div>
+    </aside>
+
+    <script src="arena/Ball.js"></script>
+    <script src="arena/WeaponBall.js"></script>
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/slingshot.js"></script>
+    <script src="premade-weapons/bow.js"></script>
+    <script src="premade-weapons/basketball.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/fists.js"></script>
+    <script src="premade-weapons/laser.js"></script>
+    <script src="premade-weapons/staff.js"></script>
+    <script src="premade-weapons/shield.js"></script>
+    <script src="premade-weapons/webs.js"></script>
+    <script src="premade-weapons/boomerang.js"></script>
+    <script src="premade-weapons/grenade.js"></script>
+    <script src="premade-weapons/thunderrod.js"></script>
+    <script src="premade-weapons/witch.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="premade-powerups/registry.js"></script>
+    <script src="premade-powerups/power.js"></script>
+    <script src="premade-powerups/speed.js"></script>
+    <script src="premade-powerups/size.js"></script>
+    <script src="premade-powerups/protection.js"></script>
+    <script src="premade-powerups/thorns.js"></script>
+    <script src="premade-powerups/apple.js"></script>
+    <script src="premade-powerups/index.js"></script>
+    <script src="premade-balls/registry.js"></script>
+    <script src="premade-balls/multiplier.js"></script>
+    <script src="premade-balls/divider.js"></script>
+    <script src="premade-balls/exponential.js"></script>
+    <script src="premade-balls/index.js"></script>
+    <script src="skins/index.js"></script>
+    <script src="intros/index.js"></script>
+    <script src="arena/ArenaSim.js"></script>
+    <script src="arena/WeaponArenaSim.js"></script>
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="arena/render/sprites.js"></script>
+    <script src="arena/render/arena-bg.js"></script>
+    <script src="arena/render/weapons-melee.js"></script>
+    <script src="arena/render/weapons-ranged.js"></script>
+    <script src="arena/render/effects.js"></script>
+    <script src="arena/render/ball.js"></script>
+    <script src="arena/render/index.js"></script>
+    <script src="arena/intro-vs-render.js"></script>
+    <script src="arena/intro-playback.js"></script>
+    <script src="arena/setup-search-select.js"></script>
+    <script src="arena/app/constants.js"></script>
+    <script src="arena/app/matchup.js"></script>
+    <script src="arena/app/roster.js"></script>
+    <script src="arena/app/odds.js"></script>
+    <script src="arena/app/ui.js"></script>
+    <script src="arena/app/sim-loop.js"></script>
+    <script src="arena/app/index.js"></script>
+    <script src="arena/arena-setup.js"></script>
+    <script src="arena/arena-record.js"></script>
+</body>
+</html>

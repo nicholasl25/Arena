@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fight Sim (headless)</title>
+    <style>
+        html, body { margin: 0; background: #111; color: #ccc; font: 14px/1.4 system-ui, sans-serif; }
+        /* ArenaApp expects these nodes; keep them offscreen. */
+        .stage-letterbox, canvas, .page-header, .contestant-roster, .stage-controls, .win-odds {
+            position: absolute; left: -9999px; width: 400px; height: 400px; overflow: hidden;
+        }
+        #status { padding: 1rem; }
+    </style>
+</head>
+<body class="arena-page" data-fight-sim="1">
+    <div id="status">FightSim ready — use pipeline/simulate_fights.py or FightSim.simulate(...)</div>
+    <div class="page">
+        <header class="page-header">
+            <h1 class="event-title">Fight Sim</h1>
+            <div class="contestant-titles" id="contestant-titles"></div>
+        </header>
+        <div class="stage-wrap">
+            <div class="stage-letterbox" id="stage-letterbox">
+                <canvas id="arena-canvas" width="400" height="400"></canvas>
+            </div>
+            <div class="win-odds" id="win-odds" hidden></div>
+        </div>
+        <section class="contestant-roster" id="contestant-roster"></section>
+        <div class="stage-controls">
+            <button type="button" class="stage-btn" id="btn-pause">Pause</button>
+            <button type="button" class="stage-btn" id="btn-clear">Clear</button>
+            <button type="button" class="stage-btn" id="btn-reset">Redo</button>
+        </div>
+    </div>
+
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/Ball.js"></script>
+    <script src="arena/WeaponBall.js"></script>
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/slingshot.js"></script>
+    <script src="premade-weapons/bow.js"></script>
+    <script src="premade-weapons/basketball.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/fists.js"></script>
+    <script src="premade-weapons/laser.js"></script>
+    <script src="premade-weapons/staff.js"></script>
+    <script src="premade-weapons/shield.js"></script>
+    <script src="premade-weapons/webs.js"></script>
+    <script src="premade-weapons/boomerang.js"></script>
+    <script src="premade-weapons/grenade.js"></script>
+    <script src="premade-weapons/thunderrod.js"></script>
+    <script src="premade-weapons/witch.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="premade-powerups/registry.js"></script>
+    <script src="premade-powerups/power.js"></script>
+    <script src="premade-powerups/speed.js"></script>
+    <script src="premade-powerups/size.js"></script>
+    <script src="premade-powerups/protection.js"></script>
+    <script src="premade-powerups/thorns.js"></script>
+    <script src="premade-powerups/apple.js"></script>
+    <script src="premade-powerups/index.js"></script>
+    <script src="premade-balls/registry.js"></script>
+    <script src="premade-balls/multiplier.js"></script>
+    <script src="premade-balls/divider.js"></script>
+    <script src="premade-balls/exponential.js"></script>
+    <script src="premade-balls/index.js"></script>
+    <script src="skins/index.js"></script>
+    <script src="arena/ArenaSim.js"></script>
+    <script src="arena/WeaponArenaSim.js"></script>
+    <script src="arena/render/sprites.js"></script>
+    <script src="arena/render/arena-bg.js"></script>
+    <script src="arena/render/weapons-melee.js"></script>
+    <script src="arena/render/weapons-ranged.js"></script>
+    <script src="arena/render/effects.js"></script>
+    <script src="arena/render/ball.js"></script>
+    <script src="arena/render/index.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="arena/app/constants.js"></script>
+    <script src="arena/app/matchup.js"></script>
+    <script src="arena/app/roster.js"></script>
+    <script src="arena/app/odds.js"></script>
+    <script src="arena/app/ui.js"></script>
+    <script src="arena/app/sim-loop.js"></script>
+    <script src="arena/app/index.js"></script>
+    <script src="arena/fight-sim.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://physics-sandbox.local/schemas/match_segment_request.schema.json",
+  "title": "MatchSegmentRequest",
+  "description": "Input to the Voice Over cell. Bracket frames come from BracketState JSON; arena pair from the Arena cell.",
+  "type": "object",
+  "required": [
+    "matchKey",
+    "script",
+    "order",
+    "mode",
+    "matchup",
+    "bracketPre",
+    "bracketPost"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "matchKey": { "type": "string", "minLength": 1 },
+    "script": { "type": "string", "minLength": 1 },
+    "order": { "type": "integer", "minimum": 0 },
+    "mode": { "enum": ["weapon", "collision"] },
+    "matchup": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["id"],
+        "properties": {
+          "id": { "type": "string" },
+          "config": { "type": "object" }
+        }
+      }
+    },
+    "aName": { "type": "string" },
+    "bName": { "type": "string" },
+    "winnerName": { "type": "string" },
+    "loserName": { "type": "string" },
+    "bracketPre": { "$ref": "bracket_state.schema.json" },
+    "bracketPost": { "$ref": "bracket_state.schema.json" },
+    "activeMatch": { "type": "object" },
+    "lastWinner": { "type": ["object", "null"] },
+    "lastLoser": { "type": ["object", "null"] },
+    "syntheticArena": { "type": "boolean" }
+  }
+}

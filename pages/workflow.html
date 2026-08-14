@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workflow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Orbitron:wght@700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="workflow/workflow.css?v=32">
+    <link rel="stylesheet" href="arena/arena.css?v=3">
+</head>
+<body class="workflow-page">
+    <header class="workflow-header">
+        <div>
+            <p class="workflow-eyebrow">Ball Arena</p>
+            <nav class="workflow-switcher" id="workflow-switcher" role="tablist" aria-label="Workflow">
+                <button type="button" class="workflow-switcher-btn is-active" role="tab" aria-selected="true" data-wf="shorts">Shorts</button>
+                <button type="button" class="workflow-switcher-btn" role="tab" aria-selected="false" data-wf="long">Long YouTube</button>
+            </nav>
+            <h1 class="workflow-title" id="workflow-title">Shorts workflow</h1>
+            <p class="workflow-subtitle" id="workflow-subtitle">Green = done · blue = in progress · dashed = waiting on a prior step. Hover icon buttons for actions.</p>
+        </div>
+        <div class="workflow-meta">
+            <div class="quota-badge" id="quota-badge" hidden>
+                YT quota: ~<strong id="quota-uploads">6</strong> uploads/day
+            </div>
+            <span id="server-status">connecting…</span>
+        </div>
+    </header>
+
+    <div class="workflow-canvas-shell">
+        <div class="workflow-actions" role="group" aria-label="Workflow controls">
+            <button
+                type="button"
+                class="wf-act-btn wf-header-act"
+                id="btn-zoom-out"
+                data-action="zoom-out"
+                data-tooltip="Zoom out"
+                aria-label="Zoom out"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M8 11h6M16.5 16.5L21 21"/></svg>
+            </button>
+            <button
+                type="button"
+                class="wf-act-btn wf-header-act"
+                id="btn-zoom-in"
+                data-action="zoom-in"
+                data-tooltip="Zoom in"
+                aria-label="Zoom in"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M11 8v6M8 11h6M16.5 16.5L21 21"/></svg>
+            </button>
+            <button
+                type="button"
+                class="wf-act-btn wf-header-act"
+                id="btn-clear-all"
+                data-action="clear-all"
+                data-tooltip="Clear all"
+                aria-label="Clear all"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" d="M4 7h16M9 7V5h6v2M8 7l1 12h6l1-12"/><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M10 11v5M14 11v5"/></svg>
+            </button>
+            <button
+                type="button"
+                class="wf-act-btn wf-header-act"
+                id="btn-restart"
+                data-action="restart"
+                data-tooltip="Restart"
+                aria-label="Restart"
+            >
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" d="M4 12a8 8 0 0 1 13.5-5.7M20 12a8 8 0 0 1-13.5 5.7"/><path fill="currentColor" d="M20 3v5h-5M4 21v-5h5"/></svg>
+            </button>
+        </div>
+        <div class="workflow-canvas-wrap">
+            <div class="workflow-canvas" id="workflow-canvas" aria-label="Workflow graph"></div>
+        </div>
+    </div>
+
+    <section class="workflow-preview" id="workflow-preview">
+        <div class="workflow-preview-head">
+            <span class="workflow-preview-label" id="preview-label">Preview</span>
+            <span class="workflow-preview-file" id="preview-file">No video yet</span>
+        </div>
+        <div class="workflow-preview-player" id="long-form-presentation">
+            <video id="preview-video" class="workflow-preview-video" controls playsinline preload="metadata"></video>
+            <canvas id="preview-bracket" class="workflow-preview-bracket" width="1280" height="720" hidden aria-label="Bracket tournament preview"></canvas>
+            <div id="workflow-preview-arena" class="workflow-preview-arena" hidden aria-label="Live tournament Arena">
+                <div class="workflow-arena-header">
+                    <span class="workflow-arena-kicker">LIVE ARENA</span>
+                    <div class="contestant-titles" id="contestant-titles"></div>
+                </div>
+                <div class="workflow-arena-stage">
+                    <div class="stage-letterbox" id="stage-letterbox">
+                        <canvas id="arena-canvas" aria-label="Live Arena simulation"></canvas>
+                    </div>
+                    <div class="stage-controls" hidden>
+                        <button type="button" class="stage-btn" id="btn-pause">Pause</button>
+                        <button type="button" class="stage-btn" id="btn-clear">Clear</button>
+                        <button type="button" class="stage-btn" id="btn-reset">Redo</button>
+                    </div>
+                    <div class="win-odds" id="win-odds" hidden></div>
+                </div>
+                <section class="contestant-roster" id="contestant-roster" aria-label="Live fighter status"></section>
+            </div>
+            <p class="workflow-preview-empty" id="preview-empty">Record a fight in the arena to preview here.</p>
+        </div>
+    </section>
+
+    <div class="workflow-log" id="workflow-log" aria-live="polite">
+        <div id="log-lines">
+            <div class="log-line"><span class="log-prefix">›</span><span>Workflow ready — start the server with python server/workflow_server.py</span></div>
+        </div>
+    </div>
+
+    <nav class="workflow-sandboxes" aria-label="Sandbox pages">
+        <a href="/pages/index.html">Arena</a>
+        <a href="/pages/wheel.html">Wheel</a>
+        <a href="/pages/bracket-sandbox.html">Bracket</a>
+    </nav>
+
+    <dialog class="wf-modal" id="modal-script">
+        <form method="dialog" class="wf-modal-inner" id="form-script">
+            <header class="wf-modal-head">
+                <h2 class="wf-modal-title">Voiceover script</h2>
+                <button type="button" class="wf-modal-close" data-close-modal aria-label="Close">×</button>
+            </header>
+            <p class="wf-modal-hint" id="compose-mode-badge" hidden></p>
+            <textarea class="wf-textarea script-area" id="input-script" placeholder="Auto-draft loads when a raw recording is detected…"></textarea>
+            <footer class="wf-modal-foot">
+                <button type="button" class="wf-btn wf-btn-secondary" id="btn-reload-script">Reload draft</button>
+                <button type="submit" class="wf-btn wf-btn-primary" value="save">Save</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="wf-modal" id="modal-caption">
+        <form method="dialog" class="wf-modal-inner" id="form-caption">
+            <header class="wf-modal-head">
+                <h2 class="wf-modal-title">YouTube caption</h2>
+                <button type="button" class="wf-modal-close" data-close-modal aria-label="Close">×</button>
+            </header>
+            <label class="wf-field">
+                <span class="wf-label">Title</span>
+                <input class="wf-input" type="text" id="input-title" maxlength="100">
+            </label>
+            <label class="wf-field">
+                <span class="wf-label">Description</span>
+                <textarea class="wf-textarea" id="input-description"></textarea>
+            </label>
+            <label class="wf-field">
+                <span class="wf-label">Privacy</span>
+                <select class="wf-select" id="input-privacy">
+                    <option value="public">Public</option>
+                    <option value="unlisted">Unlisted</option>
+                    <option value="private">Private</option>
+                </select>
+            </label>
+            <footer class="wf-modal-foot">
+                <button type="button" class="wf-btn wf-btn-secondary" id="btn-reload-caption">Reload draft</button>
+                <button type="submit" class="wf-btn wf-btn-primary" value="save">Save</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog class="wf-modal wf-setup-modal" id="modal-setup">
+        <div class="wf-modal-inner wf-setup-inner" id="setup-panel">
+            <header class="wf-modal-head">
+                <div>
+                    <p class="setup-panel-eyebrow">Ball Arena</p>
+                    <h2 class="wf-modal-title">Match setup</h2>
+                </div>
+                <button type="button" class="wf-modal-close" data-close-modal aria-label="Close">×</button>
+            </header>
+            <div class="setup-mode-toggle" id="setup-mode-toggle" role="group" aria-label="Game mode"></div>
+            <p class="setup-panel-hint">Pick fighters, skins, weapons, and stats — then save the matchup.</p>
+            <div class="setup-panel-body">
+                <div class="setup-all-stats" id="setup-all-stats"></div>
+                <div class="setup-slots" id="setup-slots"></div>
+            </div>
+            <footer class="wf-modal-foot wf-setup-foot">
+                <button type="button" class="wf-btn wf-btn-secondary" id="btn-add-fighter">+ Add fighter</button>
+                <button type="button" class="wf-btn wf-btn-primary" id="btn-save-matchup">Save matchup</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <dialog class="wf-modal wf-intro-modal" id="modal-intro">
+        <div class="wf-modal-inner wf-intro-inner">
+            <header class="wf-modal-head">
+                <div>
+                    <p class="setup-panel-eyebrow">Make intro</p>
+                    <h2 class="wf-modal-title">Fighter intros</h2>
+                </div>
+                <button type="button" class="wf-modal-close" data-close-modal aria-label="Close">×</button>
+            </header>
+            <p class="wf-modal-hint">Pick an intro image from <code>intros/</code>, click to place the ball, set radius, then save. When both are ready, play the VS splash.</p>
+            <div class="intro-slots" id="intro-slots"></div>
+            <div class="wf-field intro-picker-field">
+                <span class="wf-label">Intro image</span>
+                <div class="setup-search-select-mount" id="intro-picker-mount"></div>
+            </div>
+            <div class="intro-canvas-wrap">
+                <canvas id="intro-canvas" class="intro-canvas" width="640" height="480" aria-label="Intro placement preview"></canvas>
+            </div>
+            <label class="wf-field intro-radius-field">
+                <span class="wf-label">Ball radius <output id="intro-radius-value">0.140</output></span>
+                <input class="intro-radius-range" type="range" id="intro-radius" min="0.04" max="0.4" step="0.005" value="0.14">
+            </label>
+            <p class="intro-status" id="intro-status" aria-live="polite"></p>
+            <footer class="wf-modal-foot wf-intro-foot">
+                <button type="button" class="wf-btn wf-btn-secondary" id="btn-intro-save">Save placement</button>
+                <button type="button" class="wf-btn wf-btn-secondary" id="btn-intro-play-vs" disabled>Play VS</button>
+                <button type="button" class="wf-btn wf-btn-primary" id="btn-intro-done" disabled>Done</button>
+            </footer>
+        </div>
+    </dialog>
+
+    <div class="intro-vs-overlay" id="intro-vs-overlay" hidden></div>
+
+    <script src="arena/Ball.js"></script>
+    <script src="arena/WeaponBall.js"></script>
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/slingshot.js"></script>
+    <script src="premade-weapons/bow.js"></script>
+    <script src="premade-weapons/basketball.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/fists.js"></script>
+    <script src="premade-weapons/laser.js"></script>
+    <script src="premade-weapons/staff.js"></script>
+    <script src="premade-weapons/shield.js"></script>
+    <script src="premade-weapons/webs.js"></script>
+    <script src="premade-weapons/boomerang.js"></script>
+    <script src="premade-weapons/grenade.js"></script>
+    <script src="premade-weapons/thunderrod.js"></script>
+    <script src="premade-weapons/witch.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="premade-powerups/registry.js"></script>
+    <script src="premade-powerups/power.js"></script>
+    <script src="premade-powerups/speed.js"></script>
+    <script src="premade-powerups/size.js"></script>
+    <script src="premade-powerups/protection.js"></script>
+    <script src="premade-powerups/thorns.js"></script>
+    <script src="premade-powerups/apple.js"></script>
+    <script src="premade-powerups/index.js"></script>
+    <script src="premade-balls/registry.js"></script>
+    <script src="premade-balls/multiplier.js"></script>
+    <script src="premade-balls/divider.js"></script>
+    <script src="premade-balls/exponential.js"></script>
+    <script src="premade-balls/index.js"></script>
+    <script src="skins/index.js"></script>
+    <script src="intros/index.js"></script>
+    <script src="arena/ArenaSim.js"></script>
+    <script src="arena/WeaponArenaSim.js"></script>
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="arena/render/sprites.js"></script>
+    <script src="arena/render/arena-bg.js"></script>
+    <script src="arena/render/weapons-melee.js"></script>
+    <script src="arena/render/weapons-ranged.js"></script>
+    <script src="arena/render/effects.js"></script>
+    <script src="arena/render/ball.js"></script>
+    <script src="arena/render/index.js"></script>
+    <script src="arena/intro-vs-render.js"></script>
+    <script src="arena/setup-search-select.js?v=3"></script>
+    <script src="arena/app/constants.js"></script>
+    <script src="arena/app/matchup.js"></script>
+    <script src="arena/app/roster.js"></script>
+    <script src="arena/app/odds.js"></script>
+    <script src="arena/app/ui.js"></script>
+    <script src="arena/app/sim-loop.js"></script>
+    <script src="arena/app/index.js"></script>
+    <script src="arena/arena-setup.js?v=5"></script>
+    <script src="workflow/intro-editor.js?v=12"></script>
+    <script src="workflow/bracket.js?v=9"></script>
+    <script src="workflow/match-compose.js?v=5"></script>
+    <script src="workflow/long-pipeline.js?v=2"></script>
+    <script src="workflow/powerup-wheel.js?v=14"></script>
+    <script src="workflow/bracket-preview.js?v=23"></script>
+    <script src="workflow/graph.js?v=24"></script>
+    <script src="workflow/app/state.js?v=54"></script>
+    <script src="workflow/app/canvas-view.js?v=54"></script>
+    <script src="workflow/app/setup.js?v=54"></script>
+    <script src="workflow/app/bracket.js?v=54"></script>
+    <script src="workflow/app/compose.js?v=54"></script>
+    <script src="workflow/app/preview.js?v=54"></script>
+    <script src="workflow/app/api.js?v=54"></script>
+    <script src="workflow/app/actions.js?v=54"></script>
+    <script src="workflow/app/boot.js?v=54"></script>
+</body>
+</html>

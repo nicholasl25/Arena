@@ -1,0 +1,35 @@
+# Ball Arena — useful local links
+# Start server from this folder:  ./venv/bin/python server/workflow_server.py
+# Base: http://127.0.0.1:8764
+# Slack Shorts: /short /short-pick /add-skin /quota /arena-status /cancel /skins /weapons /random-short /long (tokens in server/.env)
+# TikTok (optional, parallel to YouTube): see tiktok/setup.md — Post take also uploads if tiktok/token.json exists
+
+http://127.0.0.1:8764/pages/index.html?view=computer
+  Long-form / YouTube arena (16:9 computer layout) — use this for pie/chart/rail CSS.
+
+http://127.0.0.1:8764/pages/index.html
+  Shorts arena (portrait layout).
+
+http://127.0.0.1:8764/pages/workflow.html?wf=long
+  Long YouTube production workflow (bracket → computer arena → VO → compose).
+
+http://127.0.0.1:8764/pages/workflow.html
+  Shorts production workflow.
+
+http://127.0.0.1:8764/pages/wheel.html
+  Standalone powerup wheel playground (spin UI without a full fight).
+
+http://127.0.0.1:8764/pages/bracket.html
+  Standalone tournament bracket view.
+
+http://127.0.0.1:8764/pages/offline-bracket.html
+  Offline / capture-oriented bracket page.
+
+http://127.0.0.1:8764/pages/offline-render.html
+  Offline arena render page used by recording/compose pipelines.
+
+http://127.0.0.1:8764/pages/simulate.html
+  Headless fight-sim harness (not a visual UI; for pipeline/sim scripts).
+
+http://127.0.0.1:8764/pages/bracket-sandbox.html
+  Bracket layout sandbox for experimenting with bracket visuals.

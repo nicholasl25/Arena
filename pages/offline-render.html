@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Offline Arena Render</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,600;1,9..40,400&family=Orbitron:wght@700;800&family=Russo+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="arena/arena.css">
+    <style>
+        /* Keep the live arena .page layout — only hide side panels. */
+        body.offline-render-page .setup-panel,
+        body.offline-render-page .record-panel,
+        body.offline-render-page .stage-controls {
+            display: none !important;
+        }
+
+        /* Capture clips title → fighter cards (see offline_record._capture_clip).
+           Don't force the page to full viewport height. */
+        body.offline-render-page:not(.arena-computer) .page {
+            min-height: 0;
+            padding-bottom: 0;
+            position: relative;
+        }
+
+        body.offline-render-page .offline-intro-layer {
+            position: absolute;
+            inset: 0;
+            z-index: 50;
+            background: #0b0f19;
+        }
+
+        body.offline-render-page .offline-intro-layer[hidden] {
+            display: none !important;
+        }
+
+        body.offline-render-page .offline-intro-layer canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+<body class="arena-page offline-render-page" data-offline-render="1">
+    <script>
+        if (new URLSearchParams(window.location.search).get('view') === 'computer') {
+            document.body.classList.add('arena-computer');
+        }
+    </script>
+    <div class="page" id="offline-phone-page">
+        <div class="offline-intro-layer" id="offline-intro-layer" hidden>
+            <canvas id="offline-intro-canvas" aria-hidden="true"></canvas>
+        </div>
+        <header class="page-header">
+            <h1 class="event-title">Ball Arena</h1>
+            <div class="contestant-titles" id="contestant-titles" aria-label="Contestants"></div>
+        </header>
+
+        <div class="stage-wrap">
+            <div class="stage-controls">
+                <button type="button" class="stage-btn" id="btn-pause">Pause</button>
+                <button type="button" class="stage-btn" id="btn-clear">Clear</button>
+                <button type="button" class="stage-btn" id="btn-reset">Redo</button>
+            </div>
+            <div class="stage-letterbox" id="stage-letterbox">
+                <canvas id="arena-canvas"></canvas>
+            </div>
+            <div class="win-odds" id="win-odds" hidden aria-label="Win probability"></div>
+        </div>
+
+        <section class="contestant-roster" id="contestant-roster" aria-label="Contestant details"></section>
+    </div>
+
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/Ball.js"></script>
+    <script src="arena/WeaponBall.js"></script>
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/slingshot.js"></script>
+    <script src="premade-weapons/bow.js"></script>
+    <script src="premade-weapons/basketball.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/fists.js"></script>
+    <script src="premade-weapons/laser.js"></script>
+    <script src="premade-weapons/staff.js"></script>
+    <script src="premade-weapons/shield.js"></script>
+    <script src="premade-weapons/webs.js"></script>
+    <script src="premade-weapons/boomerang.js"></script>
+    <script src="premade-weapons/grenade.js"></script>
+    <script src="premade-weapons/thunderrod.js"></script>
+    <script src="premade-weapons/witch.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="premade-powerups/registry.js"></script>
+    <script src="premade-powerups/power.js"></script>
+    <script src="premade-powerups/speed.js"></script>
+    <script src="premade-powerups/size.js"></script>
+    <script src="premade-powerups/protection.js"></script>
+    <script src="premade-powerups/thorns.js"></script>
+    <script src="premade-powerups/apple.js"></script>
+    <script src="premade-powerups/index.js"></script>
+    <script src="premade-balls/registry.js"></script>
+    <script src="premade-balls/multiplier.js"></script>
+    <script src="premade-balls/divider.js"></script>
+    <script src="premade-balls/exponential.js"></script>
+    <script src="premade-balls/index.js"></script>
+    <script src="skins/index.js"></script>
+    <script src="intros/index.js"></script>
+    <script src="arena/ArenaSim.js"></script>
+    <script src="arena/WeaponArenaSim.js"></script>
+    <script src="arena/render/sprites.js"></script>
+    <script src="arena/render/arena-bg.js"></script>
+    <script src="arena/render/weapons-melee.js"></script>
+    <script src="arena/render/weapons-ranged.js"></script>
+    <script src="arena/render/effects.js"></script>
+    <script src="arena/render/ball.js"></script>
+    <script src="arena/render/index.js"></script>
+    <script src="arena/intro-vs-render.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="arena/app/constants.js"></script>
+    <script src="arena/app/matchup.js"></script>
+    <script src="arena/app/roster.js"></script>
+    <script src="arena/app/odds.js"></script>
+    <script src="arena/app/ui.js"></script>
+    <script src="arena/app/sim-loop.js"></script>
+    <script src="arena/app/index.js"></script>
+    <script src="arena/offline-render.js"></script>
+</body>
+</html>

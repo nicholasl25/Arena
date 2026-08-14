@@ -1,0 +1,2 @@
+# Used by pipeline/offline_record.py (fun/venv)
+playwright>=1.40

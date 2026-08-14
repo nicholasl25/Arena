@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Bracket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ece8e1;
+            --surface: #f5f1ea;
+            --card: #faf7f1;
+            --text: #111111;
+            --muted: rgba(0, 0, 0, 0.5);
+            --accent: #2563eb;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", system-ui, sans-serif;
+        }
+        .bracket-page {
+            min-height: 100dvh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 12px;
+            padding: 16px;
+            background: var(--bg);
+        }
+        .bracket-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .bracket-title {
+            margin: 0;
+            font-family: "Russo One", "Bebas Neue", sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            letter-spacing: 0.04em;
+        }
+        .bracket-status {
+            font-size: 14px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .bracket-stage {
+            display: grid;
+            place-items: center;
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 0;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65) inset,
+                0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        #bracket-canvas {
+            display: block;
+            width: min(100%, calc((100dvh - 120px) * 16 / 9));
+            max-height: calc(100dvh - 120px);
+            aspect-ratio: 16 / 9;
+            background: var(--bg);
+        }
+        .bracket-foot {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .bracket-done {
+            appearance: none;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            background: var(--card);
+            color: var(--text);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .bracket-done:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+        .bracket-done[hidden] { display: none; }
+    </style>
+</head>
+<body class="bracket-page">
+    <header class="bracket-head">
+        <h1 class="bracket-title">Tournament Bracket</h1>
+        <span class="bracket-status" id="bracket-status">Loading…</span>
+    </header>
+    <div class="bracket-stage">
+        <canvas id="bracket-canvas" width="1280" height="720" aria-label="Bracket tournament view"></canvas>
+    </div>
+    <footer class="bracket-foot">
+        <button type="button" class="bracket-done" id="bracket-done" hidden>Done</button>
+    </footer>
+
+    <script src="workflow/bracket.js?v=9"></script>
+    <script src="workflow/bracket-preview.js?v=23"></script>
+    <script>
+        (function () {
+            'use strict';
+            const BRACKET_STORAGE_KEY = 'workflow-bracket-v1';
+            const params = new URLSearchParams(window.location.search);
+            const fromWorkflow = params.get('from') === 'workflow-long';
+            const statusEl = document.getElementById('bracket-status');
+            const doneBtn = document.getElementById('bracket-done');
+            const canvas = document.getElementById('bracket-canvas');
+
+            function loadBracket() {
+                try {
+                    const raw = localStorage.getItem(BRACKET_STORAGE_KEY);
+                    if (!raw) return null;
+                    return JSON.parse(raw);
+                } catch {
+                    return null;
+                }
+            }
+
+            function returnToWorkflow() {
+                if (window.opener && !window.opener.closed) {
+                    window.opener.focus();
+                    window.close();
+                    return;
+                }
+                window.location.href = '/pages/workflow.html?wf=long';
+            }
+
+            if (fromWorkflow && doneBtn) {
+                doneBtn.hidden = false;
+                doneBtn.addEventListener('click', returnToWorkflow);
+            }
+
+            const state = loadBracket();
+            if (!state?.fighters?.length) {
+                if (statusEl) {
+                    statusEl.textContent = 'No bracket yet — save fighters in the Long YouTube workflow first.';
+                }
+                return;
+            }
+
+            window.WorkflowBracketPreview.mount(canvas, {
+                onStatus(text) {
+                    if (statusEl && text) statusEl.textContent = text;
+                },
+            });
+            window.WorkflowBracketPreview.start(state, { initialView: 'bracket', bracketOnly: true });
+            window.addEventListener('resize', () => window.WorkflowBracketPreview.resize());
+        }());
+    </script>
+</body>
+</html>

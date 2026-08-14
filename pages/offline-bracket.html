@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offline Bracket Render</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        html, body {
+            margin: 0;
+            background: #ece8e1;
+            overflow: hidden;
+        }
+        #bracket-canvas {
+            display: block;
+            width: 1280px;
+            height: 720px;
+            background: #ece8e1;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="bracket-canvas" width="1280" height="720" aria-label="Offline tournament bracket"></canvas>
+    <script src="sound-effects/howler.min.js"></script>
+    <script src="sound-effects/zzfx.js"></script>
+    <script src="arena/arena-audio.js"></script>
+    <script src="skins/index.js"></script>
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/slingshot.js"></script>
+    <script src="premade-weapons/bow.js"></script>
+    <script src="premade-weapons/basketball.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/fists.js"></script>
+    <script src="premade-weapons/laser.js"></script>
+    <script src="premade-weapons/staff.js"></script>
+    <script src="premade-weapons/shield.js"></script>
+    <script src="premade-weapons/webs.js"></script>
+    <script src="premade-weapons/boomerang.js"></script>
+    <script src="premade-weapons/grenade.js"></script>
+    <script src="premade-weapons/thunderrod.js"></script>
+    <script src="premade-weapons/witch.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="workflow/bracket.js?v=9"></script>
+    <script src="workflow/powerup-wheel.js?v=14"></script>
+    <script src="workflow/bracket-preview.js?v=24"></script>
+    <script src="workflow/offline-bracket.js?v=6"></script>
+</body>
+</html>

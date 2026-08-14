@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <base href="/">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Bracket</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;600;700&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ece8e1;
+            --surface: #f5f1ea;
+            --card: #faf7f1;
+            --text: #111111;
+            --muted: rgba(0, 0, 0, 0.5);
+            --accent: #7c3aed;
+        }
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            min-height: 100%;
+            background: var(--bg);
+            color: var(--text);
+            font-family: "DM Sans", system-ui, sans-serif;
+        }
+        .bracket-page {
+            min-height: 100dvh;
+            display: grid;
+            grid-template-rows: auto 1fr auto;
+            gap: 12px;
+            padding: 16px;
+        }
+        .bracket-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .bracket-title {
+            margin: 0;
+            font-family: "Russo One", "DM Sans", sans-serif;
+            font-size: clamp(28px, 4vw, 42px);
+            letter-spacing: 0.04em;
+        }
+        .bracket-status {
+            font-size: 14px;
+            color: var(--muted);
+            font-variant-numeric: tabular-nums;
+        }
+        .bracket-stage {
+            display: grid;
+            place-items: center;
+            background: var(--surface);
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 12px;
+            overflow: hidden;
+            min-height: 0;
+            box-shadow:
+                0 1px 0 rgba(255, 255, 255, 0.65) inset,
+                0 8px 24px rgba(0, 0, 0, 0.08);
+        }
+        #bracket-canvas {
+            display: block;
+            width: min(100%, calc((100dvh - 140px) * 16 / 9));
+            max-height: calc(100dvh - 140px);
+            aspect-ratio: 16 / 9;
+            background: var(--bg);
+            cursor: pointer;
+        }
+        .bracket-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .bracket-hint {
+            margin: 0;
+            font-size: 13px;
+            color: var(--muted);
+        }
+        .bracket-reset {
+            appearance: none;
+            border: 1px solid rgba(0, 0, 0, 0.16);
+            background: var(--card);
+            color: var(--text);
+            font: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .bracket-reset:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+    </style>
+</head>
+<body class="bracket-page">
+    <header class="bracket-head">
+        <h1 class="bracket-title">Tournament Bracket</h1>
+        <span class="bracket-status" id="bracket-status">Sandbox — dummy fighters only</span>
+    </header>
+    <div class="bracket-stage">
+        <canvas id="bracket-canvas" width="1280" height="720" aria-label="Bracket sandbox"></canvas>
+    </div>
+    <footer class="bracket-foot">
+        <p class="bracket-hint">Demo winners only. Click the bracket, press Space, or use Play again.</p>
+        <button type="button" class="bracket-reset" id="btn-reset">Play again</button>
+    </footer>
+
+    <script src="premade-weapons/registry.js"></script>
+    <script src="premade-weapons/sword.js"></script>
+    <script src="premade-weapons/dagger.js"></script>
+    <script src="premade-weapons/spikes.js"></script>
+    <script src="premade-weapons/hammer.js"></script>
+    <script src="premade-weapons/index.js"></script>
+    <script src="workflow/bracket.js?v=9"></script>
+    <script src="workflow/bracket-preview.js?v=23"></script>
+    <script>
+        (function () {
+            'use strict';
+
+            const canvas = document.getElementById('bracket-canvas');
+            const statusEl = document.getElementById('bracket-status');
+            const btn = document.getElementById('btn-reset');
+            const Bracket = window.WorkflowBracket;
+            const Preview = window.WorkflowBracketPreview;
+            if (!canvas || !Bracket || !Preview) return;
+
+            const DUMMIES = [
+                { id: '_weapon', name: 'Hammer', color: '#f97316', weaponId: 'hammer' },
+                { id: '_weapon', name: 'Dagger', color: '#3b82f6', weaponId: 'dagger' },
+                { id: '_weapon', name: 'Sword', color: '#ef4444', weaponId: 'sword' },
+                { id: '_weapon', name: 'Spikes', color: '#a855f7', weaponId: 'spikes' },
+            ].map((row, index) => ({
+                ...row,
+                slotKey: `slot-${index}:_weapon:${row.weaponId}`,
+                slotIndex: index,
+                arenaMatchup: {
+                    id: '_weapon',
+                    config: { weaponId: row.weaponId, name: row.name, color: row.color },
+                },
+            }));
+
+            function begin() {
+                Preview.mount(canvas, {
+                    onStatus(text) {
+                        if (statusEl && text) statusEl.textContent = text;
+                    },
+                });
+                Preview.start(Bracket.buildFromFighters(DUMMIES), {
+                    bracketOnly: true,
+                    autorun: true,
+                });
+                Preview.preloadWeaponIcons?.(Preview.getBracketState?.());
+            }
+
+            btn?.addEventListener('click', begin);
+            canvas.addEventListener('pointerdown', () => {
+                if (Preview.getPhase?.() === Preview.PHASE?.CHAMPION) begin();
+            });
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' && !e.repeat) {
+                    e.preventDefault();
+                    begin();
+                }
+            });
+            window.addEventListener('resize', () => Preview.resize());
+            begin();
+        }());
+    </script>
+</body>
+</html>

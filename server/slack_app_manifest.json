@@ -1,0 +1,107 @@
+{
+  "display_information": {
+    "name": "Ball Arena",
+    "description": "Generate YouTube Shorts via Slack — 3 takes, pick one, or add skins.",
+    "background_color": "#1a1a1a"
+  },
+  "features": {
+    "bot_user": {
+      "display_name": "Ball Arena",
+      "always_online": true
+    },
+    "slash_commands": [
+      {
+        "command": "/short",
+        "description": "Weapon setup form → generate Shorts takes → pick one to post",
+        "usage_hint": "[opens form]",
+        "should_escape": false
+      },
+      {
+        "command": "/short-pick",
+        "description": "Re-show Post / Don't post buttons for the latest unfinished takes",
+        "usage_hint": "[latest job]",
+        "should_escape": false
+      },
+      {
+        "command": "/add-skin",
+        "description": "Upload an image as a new fighter skin",
+        "usage_hint": "[opens form]",
+        "should_escape": false
+      },
+      {
+        "command": "/quota",
+        "description": "YouTube Data API upload quota reminder",
+        "usage_hint": "[hint]",
+        "should_escape": false
+      },
+      {
+        "command": "/arena-status",
+        "description": "Server, pipeline stages, and latest candidate job",
+        "usage_hint": "[status]",
+        "should_escape": false
+      },
+      {
+        "command": "/cancel",
+        "description": "Cancel unfinished takes — nothing posted",
+        "usage_hint": "[latest job]",
+        "should_escape": false
+      },
+      {
+        "command": "/skins",
+        "description": "List fighter skins by category",
+        "usage_hint": "[list]",
+        "should_escape": false
+      },
+      {
+        "command": "/weapons",
+        "description": "List premade weapons",
+        "usage_hint": "[list]",
+        "should_escape": false
+      },
+      {
+        "command": "/random-short",
+        "description": "Same skins/stats as last setup; random weapons + powerups → 1 take",
+        "usage_hint": "[1 take]",
+        "should_escape": false
+      },
+      {
+        "command": "/long",
+        "description": "Long YouTube tournament — shared HP/radius; skins list or weapons list",
+        "usage_hint": "[opens form]",
+        "should_escape": false
+      }
+    ]
+  },
+  "oauth_config": {
+    "scopes": {
+      "bot": [
+        "app_mentions:read",
+        "channels:history",
+        "channels:join",
+        "chat:write",
+        "commands",
+        "files:read",
+        "files:write",
+        "groups:history",
+        "im:history",
+        "im:write"
+      ]
+    }
+  },
+  "settings": {
+    "event_subscriptions": {
+      "bot_events": [
+        "app_mention",
+        "message.channels",
+        "message.groups",
+        "message.im"
+      ]
+    },
+    "interactivity": {
+      "is_enabled": true
+    },
+    "org_deploy_enabled": false,
+    "socket_mode_enabled": true,
+    "token_rotation_enabled": false
+  }
+}

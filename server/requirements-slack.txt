@@ -1,0 +1,3 @@
+# Used by server/slack_bot.py (Socket Mode)
+slack-bolt>=1.18.0
+slack-sdk>=3.27.0
