@@ -100,6 +100,7 @@ def write_winner_meta(video_path: Path, meta: dict) -> Path | None:
         "offline": True,
         "hasIntro": has_intro,
         "introFrames": meta.get("introFrames") or 0,
+        "fps": meta.get("fps") or 30,
         "intros": meta.get("intros") or [],
         "introMode": meta.get("introMode"),
     }
@@ -491,6 +492,7 @@ def record_offline(
         "hasIntro": bool(info.get("hasIntro")),
         "introFrames": info.get("introFrames") or 0,
         "winner": (meta or {}).get("winner"),
+        "draw": bool((meta or {}).get("draw")) or not (meta or {}).get("winner"),
         "captureSec": round(capture_sec, 2),
         "totalSec": round(total_sec, 2),
     }

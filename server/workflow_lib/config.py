@@ -21,6 +21,7 @@ YT_SCRIPTS = YT_DIR / "scripts"
 TIKTOK_DIR = ARENA_DIR / "tiktok"
 TIKTOK_SCRIPTS = TIKTOK_DIR / "scripts"
 SETUP_PATH = SERVER_DIR / "auto_post_setup.json"
+LAST_RUN_PATH = SERVER_DIR / "last_slack_run.json"
 JOBS_DIR = SERVER_DIR / "candidate_jobs"
 QUOTA_LOG_PATH = SERVER_DIR / "youtube_quota_log.json"
 UPLOAD_COST_UNITS = 1600

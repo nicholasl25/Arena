@@ -18,7 +18,10 @@ from googleapiclient.http import MediaFileUpload
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TOKEN_PATH = SKILL_DIR / "token.json"
 ENV_PATH = SKILL_DIR / ".env"
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 
 
 def load_env() -> tuple[str, str]:
@@ -91,6 +94,11 @@ def main() -> None:
         help="ISO-8601 UTC publish time (forces privacy=private until publish)",
     )
     parser.add_argument("--made-for-kids", action="store_true")
+    parser.add_argument(
+        "--thumbnail",
+        default=None,
+        help="JPEG/PNG still to set as the custom thumbnail (intro frame)",
+    )
     args = parser.parse_args()
 
     video_path = Path(args.file).expanduser().resolve()
@@ -142,6 +150,20 @@ def main() -> None:
             print(f"Upload {pct}%", file=sys.stderr)
 
     video_id = response["id"]
+    thumbnail_error = None
+    if args.thumbnail:
+        thumb_path = Path(args.thumbnail).expanduser().resolve()
+        if thumb_path.is_file():
+            try:
+                youtube.thumbnails().set(
+                    videoId=video_id,
+                    media_body=MediaFileUpload(str(thumb_path), resumable=False),
+                ).execute()
+            except Exception as exc:  # noqa: BLE001
+                thumbnail_error = str(exc)
+                print(f"Thumbnail skipped: {exc}", file=sys.stderr)
+        else:
+            thumbnail_error = f"thumbnail not found: {thumb_path}"
     result = {
         "videoId": video_id,
         "shortsUrl": f"https://www.youtube.com/shorts/{video_id}",
@@ -149,6 +171,10 @@ def main() -> None:
         "studioUrl": f"https://studio.youtube.com/video/{video_id}/edit",
         "privacy": privacy,
     }
+    if args.thumbnail and not thumbnail_error:
+        result["thumbnail"] = True
+    if thumbnail_error:
+        result["thumbnailError"] = thumbnail_error
     print(json.dumps(result, indent=2))
 
 

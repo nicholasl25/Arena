@@ -364,6 +364,77 @@ def offline_record_video(
     return data
 
 
+def _intro_seek_seconds(video_path: Path, raw_name: str | None = None) -> tuple[Path, float] | None:
+    """Video + timestamp for an intro still. None if there is no intro."""
+    if video_path.name == "tournament-final.mp4":
+        intro = RECORDINGS / "composed" / "tournament" / "clips" / "intro.mp4"
+        if intro.is_file():
+            return intro, 0.4
+        return video_path, 1.0
+
+    sidecar = None
+    if raw_name:
+        candidate = STAGES["raw"] / Path(raw_name).with_suffix(".json").name
+        if candidate.is_file():
+            sidecar = candidate
+    if sidecar is None:
+        for folder in (video_path.parent, STAGES["raw"]):
+            candidate = folder / f"{video_path.stem.replace('-final', '')}.json"
+            if candidate.is_file():
+                sidecar = candidate
+                break
+    if sidecar is None:
+        return None
+    try:
+        data = json.loads(sidecar.read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    frames = int(data.get("introFrames") or 0)
+    if frames <= 0 and not data.get("hasIntro"):
+        return None
+    fps = float(data.get("fps") or 30) or 30.0
+    if frames <= 0:
+        frames = int(round(4 * fps))
+    return video_path, max(0.2, (frames / fps) * 0.45)
+
+
+def extract_intro_thumbnail(
+    video_path: Path,
+    *,
+    raw_name: str | None = None,
+) -> Path | None:
+    """Grab a JPEG still from the intro. None if ffmpeg fails or there is no intro."""
+    found = _intro_seek_seconds(video_path, raw_name=raw_name)
+    if not found:
+        return None
+    source, seek = found
+    ffmpeg = shutil.which("ffmpeg")
+    if not ffmpeg or not source.is_file():
+        return None
+    out = video_path.with_name(f"{video_path.stem}-thumb.jpg")
+    proc = subprocess.run(
+        [
+            ffmpeg,
+            "-y",
+            "-ss",
+            f"{seek:.2f}",
+            "-i",
+            str(source),
+            "-frames:v",
+            "1",
+            "-q:v",
+            "2",
+            str(out),
+        ],
+        capture_output=True,
+        text=True,
+    )
+    if proc.returncode != 0 or not out.is_file() or out.stat().st_size < 100:
+        out.unlink(missing_ok=True)
+        return None
+    return out
+
+
 def upload_video(
     composed_name: str,
     title: str,
@@ -371,6 +442,7 @@ def upload_video(
     privacy: str = PRIVACY_DEFAULT,
     tags: str = TAGS_DEFAULT,
     category: str = CATEGORY_DEFAULT,
+    raw_name: str | None = None,
 ) -> dict:
     composed_path = STAGES["composed"] / composed_name
     if not composed_path.is_file():
@@ -398,6 +470,9 @@ def upload_video(
         "--category",
         category,
     ]
+    thumb = extract_intro_thumbnail(upload_path, raw_name=raw_name)
+    if thumb:
+        args.extend(["--thumbnail", str(thumb)])
     proc = subprocess.run(
         [python_executable(), str(YT_SCRIPTS / "upload_short.py"), *args],
         text=True,
@@ -426,6 +501,12 @@ def upload_video(
     shutil.move(str(upload_path), str(dest))
     if composed_path.is_file() and composed_path != upload_path:
         composed_path.unlink(missing_ok=True)
+    if thumb:
+        posted_thumb = STAGES["posted"] / thumb.name
+        try:
+            shutil.move(str(thumb), str(posted_thumb))
+        except OSError:
+            thumb.unlink(missing_ok=True)
 
     result["postedFile"] = posted_name
     try:

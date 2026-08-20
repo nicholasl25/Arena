@@ -102,6 +102,13 @@ def register(app, ctx: dict) -> None:
                 setup = _randomize_loadout(saved, ws)
                 label = _loadout_summary(setup)
                 ch = resolve_channel(client, body)
+                ws.save_last_run(
+                    kind="random-short",
+                    label=label,
+                    payload={"setup": setup, "count": 1},
+                    user=user,
+                    channel=ch,
+                )
                 client.chat_postMessage(
                     channel=ch,
                     text=(
@@ -112,8 +119,10 @@ def register(app, ctx: dict) -> None:
                 run_candidates(
                     client, channel=ch, user=user, setup=setup, count=1
                 )
+                ws.mark_last_run_ok()
             except Exception as exc:  # noqa: BLE001
                 traceback.print_exc()
-                reply(client, body, f"`/random-short` failed: `{exc}`")
+                ws.mark_last_run_failed(exc)
+                reply(client, body, f"`/random-short` failed: `{exc}` — try `/retry`")
 
         run_async(work)

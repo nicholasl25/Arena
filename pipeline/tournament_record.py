@@ -728,6 +728,16 @@ def ensure_match_segment_media(
             out_path=arena,
         )
         arena_winner = (arena_meta or {}).get("winner")
+        arena_draw = bool((arena_meta or {}).get("draw")) or not arena_winner
+        if arena_draw:
+            slog.log(f"segment: draw {label} — no winner (caller should re-roll)")
+            return {
+                "created": True,
+                "draw": True,
+                "arena": arena_meta,
+                "winnerName": None,
+                "bracketPost": None,
+            }
         if arena_winner:
             synced = _sync_bracket_to_arena_winner(bracket_pre, arena_winner)
             if not synced and not (isinstance(bracket_post, dict) and bracket_post.get("rounds")):

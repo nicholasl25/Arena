@@ -12,7 +12,10 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 SKILL_DIR = Path(__file__).resolve().parent.parent
 TOKEN_PATH = SKILL_DIR / "token.json"
 ENV_PATH = SKILL_DIR / ".env"
-SCOPES = ["https://www.googleapis.com/auth/youtube.upload"]
+SCOPES = [
+    "https://www.googleapis.com/auth/youtube.upload",
+    "https://www.googleapis.com/auth/youtube.force-ssl",
+]
 
 
 def load_env() -> tuple[str, str]:

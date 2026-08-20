@@ -69,6 +69,12 @@
         "description": "Long YouTube tournament — shared HP/radius; skins list or weapons list",
         "usage_hint": "[opens form]",
         "should_escape": false
+      },
+      {
+        "command": "/retry",
+        "description": "Re-run the most recent /short, /random-short, or /long (retries on errors)",
+        "usage_hint": "[attempts]",
+        "should_escape": false
       }
     ]
   },

@@ -1,4 +1,5 @@
 auto_post_setup.json
+last_slack_run.json
 youtube_quota_log.json
 .env
 candidate_jobs/

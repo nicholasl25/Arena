@@ -13,6 +13,7 @@ Slash commands (core in this file; extras in server/slack_commands/):
   /weapons       List premade weapons
   /random-short  Last setup, random weapons + powerups (skins/stats fixed)
   /long          Long YouTube tournament (shared stats; skins list or weapons)
+  /retry         Re-run most recent short/long (optional: /retry 3)
 
 Also: mention the bot or DM it with a fight prompt
   e.g. "Make Daemon and Aragorn fighting with swords"
@@ -51,7 +52,7 @@ ENV_PATH = SERVER_DIR / ".env"
 if str(SERVER_DIR) not in sys.path:
     sys.path.insert(0, str(SERVER_DIR))
 
-import workflow_server as ws  # noqa: E402
+from slack_commands._common import caption_modal
 
 
 def _load_dotenv(path: Path = ENV_PATH) -> None:
@@ -1088,7 +1089,7 @@ def _run_candidates_job(
                 channel,
                 f"<@{user}> Failed to generate takes: `{exc}`",
             )
-        return
+        raise
 
     job_id = job["jobId"]
     candidates = job["candidates"]
@@ -1113,6 +1114,8 @@ def _run_candidates_job(
             f"<@{user}> Takes are ready but buttons failed: `{_slack_err_text(exc)}` "
             f"(job `{job_id}`)",
         )
+        # Takes exist on disk — treat as success for retry bookkeeping.
+        return
 
 
 def _resolve_setup_from_draft(draft: dict, values: dict | None = None) -> tuple[dict, int]:
@@ -1419,17 +1422,29 @@ def build_app():
                 if str(ch).startswith("U"):
                     im = client.conversations_open(users=ch)
                     ch = im["channel"]["id"]
+                fighters = (setup.get("resolved") or {}).get("fighters") or []
+                label = " vs ".join(str(x) for x in fighters) if fighters else "short"
+                ws.save_last_run(
+                    kind="short",
+                    label=label,
+                    payload={"setup": setup, "count": takes},
+                    user=user,
+                    channel=ch,
+                )
                 _run_candidates_job(
                     client, channel=ch, user=user, setup=setup, count=takes
                 )
+                ws.mark_last_run_ok()
             except Exception as exc:  # noqa: BLE001
                 traceback.print_exc()
+                ws.mark_last_run_failed(exc)
                 try:
                     _dm_user(
                         client,
                         user,
                         f"Could not start short in that channel: `{exc}`\n"
-                        "Fix: invite the bot with `/invite @Ball Arena`, then `/short` again.",
+                        "Fix: invite the bot with `/invite @Ball Arena`, then `/short` again.\n"
+                        "Or `/retry` once the bot can post.",
                     )
                 except Exception:  # noqa: BLE001
                     pass
@@ -1497,18 +1512,64 @@ def build_app():
         value = body["actions"][0]["value"]
         job_id, _, idx_s = value.partition(":")
         index = int(idx_s)
-        user = body["user"]["id"]
         channel = body["channel"]["id"]
         message_ts = body["message"]["ts"]
         job = ws.load_candidate_job(job_id) or {}
         candidates = job.get("candidates") or []
-        resolved = (job.get("resolved") or {})
+        if job.get("decided"):
+            client.chat_postMessage(
+                channel=channel,
+                thread_ts=message_ts,
+                text=f"<@{body['user']['id']}> Already decided: {job['decided']}",
+            )
+            return
+        if index < 0 or index >= len(candidates):
+            return
+        take = candidates[index]
+        client.views_open(
+            trigger_id=body["trigger_id"],
+            view=caption_modal(
+                callback_id="post_caption",
+                metadata={
+                    "jobId": job_id,
+                    "index": index,
+                    "channel": channel,
+                    "messageTs": message_ts,
+                },
+                title=take.get("title") or "",
+                description=take.get("description") or "",
+                heading="Post Short",
+            ),
+        )
+
+    @app.view("post_caption")
+    def on_post_caption(ack, body, client):
+        view = body.get("view") or {}
+        values = (view.get("state") or {}).get("values") or {}
+        title = (_field(values, "title") or "").strip()
+        if not title:
+            ack(response_action="errors", errors={"title": "Title required"})
+            return
+        ack()
+        try:
+            meta = json.loads(view.get("private_metadata") or "{}")
+        except json.JSONDecodeError:
+            return
+        job_id = meta.get("jobId") or ""
+        index = int(meta.get("index") or 0)
+        channel = meta.get("channel") or ""
+        message_ts = meta.get("messageTs") or ""
+        user = body["user"]["id"]
+        description = (_field(values, "caption") or "").strip()
+        job = ws.load_candidate_job(job_id) or {}
+        candidates = job.get("candidates") or []
+        resolved = job.get("resolved") or {}
         fighters = resolved.get("fighters") or []
         label = " vs ".join(str(x) for x in fighters) if fighters else "matchup"
         if job.get("decided"):
             client.chat_postMessage(
                 channel=channel,
-                thread_ts=message_ts,
+                thread_ts=message_ts or None,
                 text=f"<@{user}> Already decided: {job['decided']}",
             )
             return
@@ -1516,24 +1577,34 @@ def build_app():
         decided = f"Posting take {index + 1} to YouTube…"
         job["decided"] = decided
         ws.save_candidate_job(job)
-        _lock_pick_message(
-            client,
-            channel=channel,
-            message_ts=message_ts,
-            user=user,
-            job_id=job_id,
-            candidates=candidates,
-            label=label,
-            decided=decided,
-        )
+        if channel and message_ts:
+            _lock_pick_message(
+                client,
+                channel=channel,
+                message_ts=message_ts,
+                user=user,
+                job_id=job_id,
+                candidates=candidates,
+                label=label,
+                decided=decided,
+            )
 
         def work():
             try:
-                result = ws.upload_candidate(job_id, index)
+                result = ws.upload_candidate(
+                    job_id, index, title=title, description=description
+                )
                 url = result.get("shortsUrl") or result.get("watchUrl") or "(no url)"
                 done = (
                     f"Posted take {index + 1}: {url}\n`{result.get('title')}`"
                 )
+                if result.get("thumbnail"):
+                    done += "\nThumbnail: intro still"
+                elif result.get("thumbnailError"):
+                    done += (
+                        f"\nThumbnail skipped: `{result['thumbnailError']}` "
+                        "(re-run `youtube/scripts/auth.py` if this is a scope error)"
+                    )
                 if isinstance(result.get("tiktok"), dict):
                     tk = result["tiktok"]
                     done += f"\nTikTok: `{tk.get('status') or 'ok'}`"
@@ -1544,37 +1615,38 @@ def build_app():
                 job2 = ws.load_candidate_job(job_id) or job
                 job2["decided"] = done
                 ws.save_candidate_job(job2)
-                _lock_pick_message(
-                    client,
-                    channel=channel,
-                    message_ts=message_ts,
-                    user=user,
-                    job_id=job_id,
-                    candidates=candidates,
-                    label=label,
-                    decided=done,
-                )
-            except Exception as exc:  # noqa: BLE001
-                traceback.print_exc()
-                # Unlock so they can retry / skip
-                job2 = ws.load_candidate_job(job_id) or job
-                job2.pop("decided", None)
-                ws.save_candidate_job(job2)
-                try:
-                    _post_pick_buttons(
+                if channel and message_ts:
+                    _lock_pick_message(
                         client,
                         channel=channel,
+                        message_ts=message_ts,
                         user=user,
                         job_id=job_id,
                         candidates=candidates,
                         label=label,
-                        status_ts=message_ts,
+                        decided=done,
                     )
+            except Exception as exc:  # noqa: BLE001
+                traceback.print_exc()
+                job2 = ws.load_candidate_job(job_id) or job
+                job2.pop("decided", None)
+                ws.save_candidate_job(job2)
+                try:
+                    if channel and message_ts:
+                        _post_pick_buttons(
+                            client,
+                            channel=channel,
+                            user=user,
+                            job_id=job_id,
+                            candidates=candidates,
+                            label=label,
+                            status_ts=message_ts,
+                        )
                 except Exception:  # noqa: BLE001
                     pass
                 client.chat_postMessage(
                     channel=channel,
-                    thread_ts=message_ts,
+                    thread_ts=message_ts or None,
                     text=f"<@{user}> Upload failed: `{exc}` — pick again or Don't post.",
                 )
 
@@ -1636,6 +1708,15 @@ def build_app():
         def work():
             try:
                 setup = ws.setup_from_request(prompt=text)
+                fighters = (setup.get("resolved") or {}).get("fighters") or []
+                label = " vs ".join(str(x) for x in fighters) if fighters else text[:60]
+                ws.save_last_run(
+                    kind="short",
+                    label=label,
+                    payload={"setup": setup, "count": 3},
+                    user=user,
+                    channel=channel,
+                )
                 _run_candidates_job(
                     client,
                     channel=channel,
@@ -1643,12 +1724,14 @@ def build_app():
                     setup=setup,
                     thread_ts=thread,
                 )
+                ws.mark_last_run_ok()
             except Exception as exc:  # noqa: BLE001
                 traceback.print_exc()
+                ws.mark_last_run_failed(exc)
                 client.chat_postMessage(
                     channel=channel,
                     thread_ts=thread,
-                    text=f"<@{user}> Could not start short: `{exc}`",
+                    text=f"<@{user}> Could not start short: `{exc}` — try `/retry`",
                 )
 
         threading.Thread(target=work, daemon=True).start()
@@ -1697,7 +1780,7 @@ def start_slack_bot_background() -> None:
     def run() -> None:
         print(
             "Slack bot → Socket Mode connected "
-            "(/short /short-pick /add-skin /long /quota /arena-status /cancel "
+            "(/short /short-pick /add-skin /long /retry /quota /arena-status /cancel "
             "/skins /weapons /random-short)",
             file=sys.stderr,
         )

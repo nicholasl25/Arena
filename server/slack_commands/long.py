@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+import json
 import traceback
 from pathlib import Path
 
-from ._common import reply, resolve_channel, run_async
+from ._common import caption_modal, field_value, reply, resolve_channel, run_async
 
 
 def _field(values: dict | None, block_id: str) -> str | None:
@@ -401,6 +402,19 @@ def register(app, ctx: dict) -> None:
                 if powerup_spin:
                     spin_bits.append("powerup spins")
                 spin_line = " · ".join(spin_bits) if spin_bits else "no wheels"
+                ws.save_last_run(
+                    kind="long",
+                    label=label,
+                    payload={
+                        "roster": roster,
+                        "powerup_spin": powerup_spin,
+                        "weapon_spin": weapon_spin,
+                        "weapon_ids": opts.get("weapon_ids"),
+                        "skin_folder": opts.get("skin_folder"),
+                    },
+                    user=user,
+                    channel=ch,
+                )
                 status = client.chat_postMessage(
                     channel=ch,
                     text=(
@@ -471,12 +485,14 @@ def register(app, ctx: dict) -> None:
                     caption=f"<@{user}> Champion *{champ}* — full long video",
                     title="tournament-final",
                 )
+                ws.mark_last_run_ok()
             except Exception as exc:  # noqa: BLE001
                 traceback.print_exc()
+                ws.mark_last_run_failed(exc)
                 reply(
                     client,
                     {"user_id": user, "channel_id": ch},
-                    f"`/long` failed: `{exc}`",
+                    f"`/long` failed: `{exc}` — `/retry` to run again",
                 )
 
         run_async(work)
@@ -517,6 +533,45 @@ def register(app, ctx: dict) -> None:
         user = body.get("user", {}).get("id") or ""
         channel = body.get("channel", {}).get("id") or user
         filename = (body.get("actions") or [{}])[0].get("value") or "tournament-final.mp4"
+        manifest = ws.load_compose_tournament().load_manifest()
+        title = ws.build_long_title(manifest)
+        description = ws.build_long_description(manifest)
+        try:
+            client.views_open(
+                trigger_id=body["trigger_id"],
+                view=caption_modal(
+                    callback_id="long_post_caption",
+                    metadata={"file": filename, "channel": channel, "user": user},
+                    title=title,
+                    description=description,
+                    heading="Post Long Video",
+                ),
+            )
+        except Exception as exc:  # noqa: BLE001
+            traceback.print_exc()
+            reply(
+                client,
+                {"user_id": user, "channel_id": channel},
+                f"Could not open caption form: `{exc}`",
+            )
+
+    @app.view("long_post_caption")
+    def on_long_post_caption(ack, body, client):
+        view = body.get("view") or {}
+        values = (view.get("state") or {}).get("values") or {}
+        title = (field_value(values, "title") or "").strip()
+        if not title:
+            ack(response_action="errors", errors={"title": "Title required"})
+            return
+        ack()
+        try:
+            meta = json.loads(view.get("private_metadata") or "{}")
+        except json.JSONDecodeError:
+            meta = {}
+        filename = meta.get("file") or "tournament-final.mp4"
+        user = meta.get("user") or body.get("user", {}).get("id") or ""
+        channel = meta.get("channel") or user
+        description = (field_value(values, "caption") or "").strip()
 
         def work():
             try:
@@ -525,19 +580,23 @@ def register(app, ctx: dict) -> None:
                     channel=ch,
                     text=f"<@{user}> Uploading `{filename}` to YouTube…",
                 )
-                manifest = ws.load_compose_tournament().load_manifest()
-                title = ws.build_long_title(manifest)
-                description = ws.build_long_description(manifest)
                 uploaded = ws.upload_video(filename, title, description)
-                url = uploaded.get("url") or uploaded.get("videoUrl") or ""
+                url = uploaded.get("url") or uploaded.get("videoUrl") or uploaded.get("watchUrl") or ""
                 extra = ""
+                if uploaded.get("thumbnail"):
+                    extra += "\nThumbnail: intro still"
+                elif uploaded.get("thumbnailError"):
+                    extra += (
+                        f"\nThumbnail skipped: `{uploaded['thumbnailError']}` "
+                        "(re-run `youtube/scripts/auth.py` if this is a scope error)"
+                    )
                 if isinstance(uploaded.get("tiktok"), dict):
                     tk = uploaded["tiktok"]
-                    extra = f"\nTikTok: `{tk.get('status') or 'ok'}`"
+                    extra += f"\nTikTok: `{tk.get('status') or 'ok'}`"
                     if tk.get("shareUrl"):
                         extra += f" {tk['shareUrl']}"
                 elif uploaded.get("tiktokError"):
-                    extra = f"\nTikTok failed: `{uploaded['tiktokError']}`"
+                    extra += f"\nTikTok failed: `{uploaded['tiktokError']}`"
                 client.chat_postMessage(
                     channel=ch,
                     text=f"<@{user}> Posted: {url or filename}\n`{title}`{extra}",

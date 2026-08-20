@@ -38,7 +38,7 @@ def main() -> None:
     print(f"Arena (computer)→ http://127.0.0.1:{PORT}/pages/index.html?view=computer", file=sys.stderr)
     print(f"Powerup wheel  → http://127.0.0.1:{PORT}/pages/wheel.html", file=sys.stderr)
     print(
-        "Slack: /short /short-pick /add-skin /long /quota /arena-status "
+        "Slack: /short /short-pick /add-skin /long /retry /quota /arena-status "
         "/cancel /skins /weapons /random-short — tokens in server/.env",
         file=sys.stderr,
     )

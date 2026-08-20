@@ -253,41 +253,75 @@ def produce_long_tournament(
             ct.clear_tournament_media()
 
         match_keys: list[str] = []
+        max_draw_retries = 5
         while True:
             nxt = node("next", str(state_path), str(match_path), check=False)
             if nxt.returncode == 2:
                 break
             if nxt.returncode != 0:
                 raise RuntimeError(nxt.stderr.strip() or nxt.stdout.strip() or "planner next failed")
-            req = json.loads(match_path.read_text())
+
+            result = None
+            winner = None
+            req = None
+            for attempt in range(max_draw_retries + 1):
+                if attempt > 0:
+                    # Same bracket match, fresh wheel spins + fight.
+                    nxt = node("next", str(state_path), str(match_path), check=False)
+                    if nxt.returncode != 0:
+                        raise RuntimeError(
+                            nxt.stderr.strip() or nxt.stdout.strip() or "planner next failed"
+                        )
+                req = json.loads(match_path.read_text())
+                key = req["matchKey"]
+                label = f"{req.get('aName')} vs {req.get('bName')}"
+                if attempt == 0:
+                    progress(
+                        "match",
+                        f"{len(match_keys) + 1} · {label} · {req.get('spinSummary') or ''}",
+                    )
+                else:
+                    progress(
+                        "draw",
+                        f"{label} — retry {attempt}/{max_draw_retries} · "
+                        f"{req.get('spinSummary') or 'new spins'}",
+                    )
+                result = tr.ensure_match_segment_media(
+                    match_key=key,
+                    script=req["script"],
+                    order_index=int(req["order"]),
+                    mode=req.get("mode") or "weapon",
+                    matchup=req["matchup"],
+                    a_name=req.get("aName"),
+                    b_name=req.get("bName"),
+                    winner_name=req.get("winnerName"),
+                    loser_name=req.get("loserName"),
+                    base_url=f"http://127.0.0.1:{PORT}",
+                    force=True,
+                    synthetic_arena=False,
+                    bracket_pre=req.get("bracketPre"),
+                    bracket_post=req.get("bracketPost"),
+                    active_match=req.get("activeMatch"),
+                    last_winner=req.get("lastWinner"),
+                    last_loser=req.get("lastLoser"),
+                    powerup_spins=req.get("powerupSpins"),
+                    weapon_spins=req.get("weaponSpins"),
+                )
+                if result.get("draw"):
+                    continue
+                winner = result.get("winnerName") or (result.get("arena") or {}).get("winner")
+                if winner:
+                    break
+
+            if not req or not result:
+                raise RuntimeError("match recording produced no result")
             key = req["matchKey"]
-            match_keys.append(key)
             label = f"{req.get('aName')} vs {req.get('bName')}"
-            progress("match", f"{len(match_keys)} · {label} · {req.get('spinSummary') or ''}")
-            result = tr.ensure_match_segment_media(
-                match_key=key,
-                script=req["script"],
-                order_index=int(req["order"]),
-                mode=req.get("mode") or "weapon",
-                matchup=req["matchup"],
-                a_name=req.get("aName"),
-                b_name=req.get("bName"),
-                winner_name=req.get("winnerName"),
-                loser_name=req.get("loserName"),
-                base_url=f"http://127.0.0.1:{PORT}",
-                force=True,
-                synthetic_arena=False,
-                bracket_pre=req.get("bracketPre"),
-                bracket_post=req.get("bracketPost"),
-                active_match=req.get("activeMatch"),
-                last_winner=req.get("lastWinner"),
-                last_loser=req.get("lastLoser"),
-                powerup_spins=req.get("powerupSpins"),
-                weapon_spins=req.get("weaponSpins"),
-            )
-            winner = result.get("winnerName") or (result.get("arena") or {}).get("winner")
             if not winner:
-                raise RuntimeError(f"arena produced no winner for {key}")
+                raise RuntimeError(
+                    f"arena draw after {max_draw_retries + 1} attempts for {label}"
+                )
+            match_keys.append(key)
             seg = result.get("segment") or {}
             progress(
                 "segment",

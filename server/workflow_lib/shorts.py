@@ -130,6 +130,7 @@ def produce_one_short(setup: dict, on_stage=None) -> dict:
 
     title = build_title(fighter_names)
     description = build_description(*fighter_names[:2]) if len(fighter_names) >= 2 else build_description("Fighter A", "Fighter B")
+    intro_frames = int(record.get("introFrames") or 0)
     if on_stage:
         on_stage(
             "done",
@@ -145,6 +146,8 @@ def produce_one_short(setup: dict, on_stage=None) -> dict:
         "description": description,
         "winner": winner,
         "script": script,
+        "introFrames": intro_frames,
+        "hasIntro": bool(record.get("hasIntro") or intro_frames),
     }
     if compose_error:
         out["composeError"] = compose_error
@@ -220,7 +223,13 @@ def generate_short_candidates(
     return {"ok": True, **job}
 
 
-def upload_candidate(job_id: str, index: int) -> dict:
+def upload_candidate(
+    job_id: str,
+    index: int,
+    *,
+    title: str | None = None,
+    description: str | None = None,
+) -> dict:
     """YouTube-upload one take from a candidate job."""
     job = load_candidate_job(job_id)
     if not job:
@@ -244,7 +253,17 @@ def upload_candidate(job_id: str, index: int) -> dict:
         take["path"] = str(STAGES["composed"] / composed_name)
         take.pop("composeError", None)
         save_candidate_job(job)
-    uploaded = upload_video(composed_name, take["title"], take["description"])
+    if title is not None:
+        take["title"] = str(title).strip()[:100]
+    if description is not None:
+        take["description"] = str(description)
+    save_candidate_job(job)
+    uploaded = upload_video(
+        composed_name,
+        take["title"],
+        take["description"],
+        raw_name=take.get("raw"),
+    )
     return {
         "ok": True,
         "jobId": job_id,

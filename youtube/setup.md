@@ -10,7 +10,9 @@
 
 1. **APIs & Services → OAuth consent screen**
 2. User type: **External** (or Internal if Workspace)
-3. Add scope: `https://www.googleapis.com/auth/youtube.upload`
+3. Add scopes:
+   - `https://www.googleapis.com/auth/youtube.upload`
+   - `https://www.googleapis.com/auth/youtube.force-ssl` (custom thumbnails from the intro still)
 4. Add your Google account as a **test user** (while app is in Testing)
 
 ## 3. OAuth client credentials
@@ -31,6 +33,8 @@ python3 -m venv .venv
 ```
 
 `auth.py` opens a browser. Sign in with the **YouTube channel** Google account. Token saves to `token.json`.
+
+If you already authenticated before custom thumbnails, run `auth.py` again so the token picks up `youtube.force-ssl`. YouTube also requires the channel to be verified (phone) before custom thumbnails stick.
 
 ## 5. Test upload
 
