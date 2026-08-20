@@ -1,4 +1,4 @@
 # Legal
 
-- [Terms of Service](./terms.md)
-- [Privacy Policy](./privacy.md)
+- [Terms of Service](./terms.html)
+- [Privacy Policy](./privacy.html)

@@ -22,22 +22,5 @@ https://nicholasl25.github.io/Arena/pages/workflow.html?wf=long
 https://nicholasl25.github.io/Arena/pages/workflow.html
   Shorts production workflow.
 
-https://nicholasl25.github.io/Arena/pages/wheel.html
-  Standalone powerup wheel playground (spin UI without a full fight).
+[Terms](https://nicholasl25.github.io/Arena/legal/terms.html) · [Privacy](https://nicholasl25.github.io/Arena/legal/privacy.html)
 
-https://nicholasl25.github.io/Arena/pages/bracket.html
-  Standalone tournament bracket view.
-
-https://nicholasl25.github.io/Arena/pages/offline-bracket.html
-  Offline / capture-oriented bracket page.
-
-https://nicholasl25.github.io/Arena/pages/offline-render.html
-  Offline arena render page used by recording/compose pipelines.
-
-https://nicholasl25.github.io/Arena/pages/simulate.html
-  Headless fight-sim harness (not a visual UI; for pipeline/sim scripts).
-
-https://nicholasl25.github.io/Arena/pages/bracket-sandbox.html
-  Bracket layout sandbox for experimenting with bracket visuals.
-
-[Terms](legal/terms.md) · [Privacy](legal/privacy.md)

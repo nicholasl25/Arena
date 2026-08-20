@@ -5,73 +5,159 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ball Arena</title>
     <style>
-        :root { color-scheme: light; }
+        :root {
+            --bg: #ece8e1;
+            --surface: #f7f3ec;
+            --ink: #1a1a1a;
+            --muted: #5c574f;
+            --line: #d5cfc4;
+            --accent: #1f4f8f;
+        }
+        * { box-sizing: border-box; }
         body {
             margin: 0;
-            font: 16px/1.5 system-ui, -apple-system, sans-serif;
-            background: #ece8e1;
-            color: #1a1a1a;
-            padding: 2rem 1.25rem 3rem;
-            max-width: 42rem;
+            min-height: 100vh;
+            font: 16px/1.55 "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+            background:
+                radial-gradient(ellipse at top left, #f4efe6 0%, transparent 55%),
+                var(--bg);
+            color: var(--ink);
         }
-        h1 { font-size: 1.75rem; margin: 0 0 0.35rem; }
-        .sub { color: #555; margin: 0 0 1.5rem; }
-        a { color: #0b57d0; }
-        ul { padding-left: 1.1rem; }
-        li { margin: 0.65rem 0; }
-        code { font-size: 0.9em; word-break: break-all; }
-        .note { margin-top: 1.75rem; font-size: 0.9rem; color: #555; }
+        main {
+            max-width: 40rem;
+            margin: 0 auto;
+            padding: 2.5rem 1.25rem 3.5rem;
+        }
+        .eyebrow {
+            margin: 0 0 0.4rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        h1 {
+            margin: 0 0 0.5rem;
+            font: 700 2rem/1.15 "Bebas Neue", Impact, sans-serif;
+            letter-spacing: 0.02em;
+        }
+        .sub {
+            margin: 0 0 2rem;
+            color: var(--muted);
+            max-width: 34rem;
+        }
+        section {
+            margin-bottom: 1.5rem;
+            padding: 1.15rem 1.2rem 1.25rem;
+            background: var(--surface);
+            border: 1px solid var(--line);
+            border-radius: 12px;
+        }
+        section h2 {
+            margin: 0 0 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+        .links {
+            display: grid;
+            gap: 0.65rem;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+        .links a {
+            display: block;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid var(--line);
+            background: #fffdf8;
+            color: inherit;
+            text-decoration: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .links a:hover {
+            border-color: #b9b1a3;
+            box-shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+        }
+        .links .label {
+            display: block;
+            font-weight: 650;
+            color: var(--accent);
+            margin-bottom: 0.2rem;
+        }
+        .links .desc {
+            display: block;
+            font-size: 0.92rem;
+            color: var(--muted);
+        }
+        .legal-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.65rem;
+        }
+        @media (max-width: 520px) {
+            .legal-row { grid-template-columns: 1fr; }
+        }
+        .legal-row a {
+            text-align: center;
+            font-weight: 650;
+            color: var(--accent);
+        }
+        .foot {
+            margin-top: 1.25rem;
+            font-size: 0.88rem;
+            color: var(--muted);
+        }
     </style>
 </head>
 <body>
-    <h1>Ball Arena</h1>
-    <p class="sub">Personal project — mostly for fun. Static demo pages (no local server).</p>
-    <ul>
-        <li>
-            <a href="pages/index.html?view=computer"><code>pages/index.html?view=computer</code></a><br>
-            Long-form / YouTube arena (16:9 computer layout) — use this for pie/chart/rail CSS.
-        </li>
-        <li>
-            <a href="pages/index.html"><code>pages/index.html</code></a><br>
-            Shorts arena (portrait layout).
-        </li>
-        <li>
-            <a href="pages/workflow.html?wf=long"><code>pages/workflow.html?wf=long</code></a><br>
-            Long YouTube production workflow (bracket → computer arena → VO → compose).
-        </li>
-        <li>
-            <a href="pages/workflow.html"><code>pages/workflow.html</code></a><br>
-            Shorts production workflow.
-        </li>
-        <li>
-            <a href="pages/wheel.html"><code>pages/wheel.html</code></a><br>
-            Standalone powerup wheel playground (spin UI without a full fight).
-        </li>
-        <li>
-            <a href="pages/bracket.html"><code>pages/bracket.html</code></a><br>
-            Standalone tournament bracket view.
-        </li>
-        <li>
-            <a href="pages/offline-bracket.html"><code>pages/offline-bracket.html</code></a><br>
-            Offline / capture-oriented bracket page.
-        </li>
-        <li>
-            <a href="pages/offline-render.html"><code>pages/offline-render.html</code></a><br>
-            Offline arena render page used by recording/compose pipelines.
-        </li>
-        <li>
-            <a href="pages/simulate.html"><code>pages/simulate.html</code></a><br>
-            Headless fight-sim harness (not a visual UI; for pipeline/sim scripts).
-        </li>
-        <li>
-            <a href="pages/bracket-sandbox.html"><code>pages/bracket-sandbox.html</code></a><br>
-            Bracket layout sandbox for experimenting with bracket visuals.
-        </li>
-    </ul>
-    <p class="note">
-        Full pipeline needs the local server. Legal:
-        <a href="legal/terms.md">Terms</a> ·
-        <a href="legal/privacy.md">Privacy</a>
-    </p>
+    <main>
+        <p class="eyebrow">Personal project</p>
+        <h1>Ball Arena</h1>
+        <p class="sub">Mostly for fun. Static demo pages below — full pipeline needs the local server.</p>
+
+        <section>
+            <h2>Demo</h2>
+            <ul class="links">
+                <li>
+                    <a href="pages/index.html?view=computer">
+                        <span class="label">Arena — computer</span>
+                        <span class="desc">Long-form / YouTube layout (16:9)</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="pages/index.html">
+                        <span class="label">Arena — Shorts</span>
+                        <span class="desc">Portrait fight layout</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="pages/workflow.html?wf=long">
+                        <span class="label">Workflow — long</span>
+                        <span class="desc">Bracket → arena → VO → compose</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="pages/workflow.html">
+                        <span class="label">Workflow — Shorts</span>
+                        <span class="desc">Shorts production graph</span>
+                    </a>
+                </li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>Legal</h2>
+            <div class="legal-row">
+                <a href="legal/terms.html">Terms of Service</a>
+                <a href="legal/privacy.html">Privacy Policy</a>
+            </div>
+        </section>
+
+        <p class="foot">Expect rough edges — built for personal use.</p>
+    </main>
 </body>
 </html>
