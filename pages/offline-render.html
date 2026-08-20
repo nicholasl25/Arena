@@ -2,7 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <base href="/">
+    <script>
+    (function () {
+        var base = '/';
+        if (/\.github\.io$/i.test(location.hostname)) {
+            var seg = location.pathname.split('/').filter(Boolean)[0];
+            if (seg) base = '/' + seg + '/';
+        }
+        document.write('<base href="' + base + '">');
+    })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Offline Arena Render</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
