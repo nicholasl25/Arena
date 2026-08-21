@@ -41,4 +41,5 @@ PAGE_REDIRECTS = {
 
 PRIVACY_DEFAULT = "public"
 TAGS_DEFAULT = "physics,simulation,shorts,gaming"
+TAGS_LONG_DEFAULT = "physics,simulation,gaming,arena,tournament"
 CATEGORY_DEFAULT = "20"
