@@ -3,7 +3,9 @@
 
 from __future__ import annotations
 
+import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
@@ -205,6 +207,82 @@ class TournamentEndpointTests(unittest.TestCase):
                     weapon_ids=["sword", "bow"],
                     skin_ids=["thor"],
                 )
+
+    def test_long_upload_skips_shorts_validation(self) -> None:
+        import workflow_lib.pipeline_ops as ops
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            composed = root / "composed"
+            posted = root / "posted"
+            composed.mkdir()
+            posted.mkdir()
+            (composed / "tournament-final.mp4").write_bytes(b"fake-video")
+            stages = {"composed": composed, "posted": posted, "raw": root / "raw"}
+
+            def fake_run(cmd, *args, **kwargs):
+                tags = cmd[cmd.index("--tags") + 1]
+                self.assertNotIn("shorts", tags.lower())
+                self.assertIn("tournament", tags)
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=json.dumps({
+                        "videoId": "abc123",
+                        "watchUrl": "https://youtu.be/abc123",
+                    }),
+                    stderr="",
+                )
+
+            with (
+                patch.object(ops, "STAGES", stages),
+                patch.object(ops, "validate_video") as validate,
+                patch.object(ops, "convert_video") as convert,
+                patch.object(ops, "extract_intro_thumbnail", return_value=None),
+                patch.object(ops, "tiktok_configured", return_value=False),
+                patch.object(ops, "record_quota_upload"),
+                patch.object(ops.subprocess, "run", side_effect=fake_run),
+            ):
+                result = ops.upload_video("tournament-final.mp4", "Champ wins", "desc")
+
+            validate.assert_not_called()
+            convert.assert_not_called()
+            self.assertEqual(result["videoId"], "abc123")
+            self.assertEqual(result["postedFile"], "tournament-final.mp4")
+            self.assertFalse((composed / "tournament-final.mp4").exists())
+            self.assertTrue((posted / "tournament-final.mp4").exists())
+
+    def test_short_upload_still_validates(self) -> None:
+        import workflow_lib.pipeline_ops as ops
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            composed = root / "composed"
+            posted = root / "posted"
+            composed.mkdir()
+            posted.mkdir()
+            (composed / "sword-vs-dagger-final.mp4").write_bytes(b"fake-video")
+            stages = {"composed": composed, "posted": posted, "raw": root / "raw"}
+
+            def fake_run(cmd, *args, **kwargs):
+                return SimpleNamespace(
+                    returncode=0,
+                    stdout=json.dumps({"videoId": "short1"}),
+                    stderr="",
+                )
+
+            with (
+                patch.object(ops, "STAGES", stages),
+                patch.object(ops, "validate_video", return_value={"ok": True}) as validate,
+                patch.object(ops, "convert_video") as convert,
+                patch.object(ops, "extract_intro_thumbnail", return_value=None),
+                patch.object(ops, "tiktok_configured", return_value=False),
+                patch.object(ops, "record_quota_upload"),
+                patch.object(ops.subprocess, "run", side_effect=fake_run),
+            ):
+                ops.upload_video("sword-vs-dagger-final.mp4", "Sword vs Dagger", "desc")
+
+            validate.assert_called_once()
+            convert.assert_not_called()
 
 
 if __name__ == "__main__":

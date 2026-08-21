@@ -23,6 +23,7 @@ from .config import (
     RECORDINGS,
     STAGES,
     TAGS_DEFAULT,
+    TAGS_LONG_DEFAULT,
     TIKTOK_DIR,
     TIKTOK_SCRIPTS,
     UPLOAD_COST_UNITS,
@@ -448,13 +449,18 @@ def upload_video(
     if not composed_path.is_file():
         raise FileNotFoundError(f"Composed video not found: {composed_name}")
 
-    validation = validate_video(composed_path)
+    long_form = composed_path.name == "tournament-final.mp4"
     upload_path = composed_path
-    if not validation.get("ok"):
-        upload_path = convert_video(composed_path)
-        validation = validate_video(upload_path)
+    if long_form:
+        if tags == TAGS_DEFAULT:
+            tags = TAGS_LONG_DEFAULT
+    else:
+        validation = validate_video(composed_path)
         if not validation.get("ok"):
-            raise RuntimeError(f"Video invalid after convert: {validation.get('errors')}")
+            upload_path = convert_video(composed_path)
+            validation = validate_video(upload_path)
+            if not validation.get("ok"):
+                raise RuntimeError(f"Video invalid after convert: {validation.get('errors')}")
 
     args = [
         "--file",

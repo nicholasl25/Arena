@@ -28,6 +28,7 @@ from .config import (
     PAGE_REDIRECTS,
     PRIVACY_DEFAULT,
     TAGS_DEFAULT,
+    TAGS_LONG_DEFAULT,
 )
 from .pipeline_ops import (
     compose_video,
@@ -203,7 +204,7 @@ class WorkflowHandler(SimpleHTTPRequestHandler):
                     "title": build_long_title(manifest),
                     "description": build_long_description(manifest),
                     "privacy": PRIVACY_DEFAULT,
-                    "tags": "physics,simulation,gaming,arena,tournament",
+                    "tags": TAGS_LONG_DEFAULT,
                     "category": CATEGORY_DEFAULT,
                 })
                 return

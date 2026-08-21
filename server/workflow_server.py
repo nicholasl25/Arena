@@ -60,6 +60,7 @@ from workflow_lib.config import (
     SKIN_EXTS,
     STAGES,
     TAGS_DEFAULT,
+    TAGS_LONG_DEFAULT,
     TIKTOK_DIR,
     TIKTOK_SCRIPTS,
     UPLOAD_COST_UNITS,
